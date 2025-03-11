@@ -1807,8 +1807,6 @@ local function updateLabels()
         infoLabel:Set(statText)
     end
 end
-
-
 local LastCharacter = game.Players.LocalPlayer.Character
 
 -- AutoBoss --
@@ -1823,16 +1821,15 @@ local function startFarmLoop()
         local character = player.Character or player.CharacterAdded:Wait() -- Lấy nhân vật hiện tại
         local rootPart = character:FindFirstChild("HumanoidRootPart")
         local lastCharacter = character -- Lưu lại nhân vật cũ để kiểm tra thay đổi
- 
--- Hủy tween cũ nếu có
-                if TweenFa then
-                    TweenFa:Cancel()
-                    TweenFa = nil
-                end
-            end
+
+        -- Hủy tween cũ nếu có
+        if TweenFa then
+            TweenFa:Cancel()
+            TweenFa = nil
+        end
+
         while getgenv().Farm do
-            
-        -- Cập nhật danh sách boss còn lại
+            -- Cập nhật danh sách boss còn lại
             UpdateActiveBossLocations()
 
             if #ActiveBossLocations == 0 then
@@ -1888,7 +1885,7 @@ local function startFarmLoop()
 
             -- Kiểm tra boss còn sống không
             local bossEntity = getclosest({boss.Name}, game:GetService("Workspace").Mobs)
-task.wait(1)
+            task.wait(1)
             if bossEntity and bossEntity:FindFirstChild("Humanoid") then
                 while getgenv().Farm and bossEntity.Parent and bossEntity.Humanoid.Health > 0 do
                     if not game.Players.LocalPlayer.Character then
@@ -1914,7 +1911,6 @@ task.wait(1)
     end)
 end
 
-
 game:GetService("RunService").Heartbeat:Connect(function()
     local player = game.Players.LocalPlayer
     local currentCharacter = player.Character
@@ -1923,18 +1919,17 @@ game:GetService("RunService").Heartbeat:Connect(function()
     elseif not getgenv().Farm and FarmLoop then
         task.cancel(FarmLoop)
         FarmLoop = nil
-	elseif getgenv().Farm and FarmLoop and currentCharacter ~= LastCharacter then
+    elseif getgenv().Farm and FarmLoop and currentCharacter ~= LastCharacter then
         LastCharacter = currentCharacter -- Cập nhật nhân vật mới
         task.wait(4) -- Chờ 4 giây sau khi hồi sinh
         getgenv().Farm = false
-task.cancel(FarmLoop)
-FarmLoop = nil
+        task.cancel(FarmLoop)
+        FarmLoop = nil
         task.wait(2) -- Chờ một chút để đảm bảo toggle tắt
         getgenv().Farm = true
         startFarmLoop()
     end
 end)
-
 --MoveAround--
             
 local MoveLoop = nil
