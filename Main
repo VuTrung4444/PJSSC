@@ -1885,6 +1885,7 @@ local function startFarmLoop()
 
             -- Kiểm tra boss còn sống không
             local bossEntity = getclosest({boss.Name}, game:GetService("Workspace").Mobs)
+task.wait(1)
             if bossEntity and bossEntity:FindFirstChild("Humanoid") and bossEntity.PrimaryPart then
                 while getgenv().Farm and bossEntity.Parent and bossEntity.Humanoid.Health > 0 do
                     if not game.Players.LocalPlayer.Character then
@@ -1906,8 +1907,6 @@ local function startFarmLoop()
                     end
                     AtBoss = GetDistance(entityCFrame) < 25
                 end
-            else
-                task.wait(1)
             end
 
             VisitedBosses[boss.Name] = true
