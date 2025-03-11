@@ -1821,15 +1821,12 @@ local function startFarmLoop()
         local player = game.Players.LocalPlayer
         local character = player.Character or player.CharacterAdded:Wait() -- Lấy nhân vật hiện tại
         local rootPart = character:FindFirstChild("HumanoidRootPart")
-        local lastCharacter = character -- Lưu lại nhân vật cũ để kiểm tra thay đổi
 
-
-                -- Hủy tween cũ nếu có
-                if TweenFa then
-                    TweenFa:Cancel()
-                    TweenFa = nil
-                end
-            end
+        -- Hủy tween cũ nếu có
+        if TweenFa then
+            TweenFa:Cancel()
+            TweenFa = nil
+        end
 
         while getgenv().Farm do
             -- Cập nhật danh sách boss còn lại
@@ -1888,30 +1885,25 @@ local function startFarmLoop()
 
             -- Kiểm tra boss còn sống không
             local bossEntity = getclosest({boss.Name}, game:GetService("Workspace").Mobs)
-if bossEntity and bossEntity:FindFirstChild("Humanoid") and bossEntity:FindFirstChild("PrimaryPart") then
+            if bossEntity and bossEntity:FindFirstChild("Humanoid") and bossEntity.PrimaryPart then
                 while getgenv().Farm and bossEntity.Parent and bossEntity.Humanoid.Health > 0 do
                     if not game.Players.LocalPlayer.Character then
                         break
                     end
                     task.wait()
 
-local entityCFrame
-if bossEntity and bossEntity:FindFirstChild("PrimaryPart") then
-    entityCFrame = CFrame.new(bossEntity.PrimaryPart.Position) * FarmModes
-else
-    task.wait(0.5)
-    continue
-end
+                    local entityCFrame = CFrame.new(bossEntity.PrimaryPart.Position) * FarmModes
+
                     if GetDistance(entityCFrame) >= 25 and GetDistance(entityCFrame) < 150 then
-    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = entityCFrame
-else
-    if not TweenFa or (TweenFa and TweenFa.Goal ~= entityCFrame) then
-        if TweenFa then
-            TweenFa:Cancel() -- Hủy tween cũ nếu cần
-        end
-        TweenFa = Tween(entityCFrame) -- Tạo tween mới nếu cần
-    end
-end
+                        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = entityCFrame
+                    else
+                        if not TweenFa or (TweenFa.Goal ~= entityCFrame and GetDistance(entityCFrame) > 5) then
+                            if TweenFa then
+                                TweenFa:Cancel() -- Hủy tween cũ nếu cần
+                            end
+                            TweenFa = Tween(entityCFrame) -- Tạo tween mới nếu cần
+                        end
+                    end
                     AtBoss = GetDistance(entityCFrame) < 25
                 end
             else
@@ -1932,18 +1924,19 @@ game:GetService("RunService").Heartbeat:Connect(function()
     elseif not getgenv().Farm and FarmLoop then
         task.cancel(FarmLoop)
         FarmLoop = nil
-	elseif getgenv().Farm and FarmLoop and currentCharacter ~= LastCharacter then
-    task.wait(4) -- Chờ 4 giây sau khi hồi sinh
-    LastCharacter = currentCharacter -- Cập nhật nhân vật mới
-    getgenv().Farm = false
-    task.cancel(FarmLoop)
-    FarmLoop = nil
-    task.wait(2) -- Chờ một chút để đảm bảo toggle tắt
-    getgenv().Farm = true
-    startFarmLoop()
-end
+    elseif getgenv().Farm and currentCharacter ~= LastCharacter and FarmLoop then
+        task.wait(4) -- Chờ 4 giây sau khi hồi sinh
+        LastCharacter = currentCharacter -- Cập nhật nhân vật mới
+        getgenv().Farm = false
+        task.cancel(FarmLoop)
+        FarmLoop = nil
+        task.wait(2) -- Chờ một chút để đảm bảo toggle tắt
+        getgenv().Farm = true
+        startFarmLoop()
+    end
 end)
 
+                
 --MoveAround--
             
 local MoveLoop = nil
