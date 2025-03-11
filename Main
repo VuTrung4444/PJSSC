@@ -16,7 +16,7 @@ local supremeClans = {"Kamado", "Agatsuma", "Rengoku", "Uzui"}
 
 local huntLegendary = false  
 local huntMythic = false  
-local huntSupreme = true
+local huntSupreme = false
 
 local function getFilteredClans()
     local targetClans = {}
@@ -114,16 +114,19 @@ if game.PlaceId == mainMenuPlaceID then
         end
     })
 
-    DailySection:AddToggle({
-        Name = "Auto Spin Clan",
-        Flag = "AutoSpinClan",
-        Callback = function(state)
-            ClanSpinEnabled = state
-            if state then
-                autoSpinClan()
-            end
-        end
-    })
+	DailySection:AddToggle({ 
+		Name = "Auto Spin Clan",
+		Flag = "AutoSpinClan",
+		Callback = function(state)
+			-- Kiểm tra nếu ít nhất một trong ba toggle săn clan được bật
+			if state and (huntLegendary or huntMythic or huntSupreme) then
+				ClanSpinEnabled = true
+				autoSpinClan()
+			else
+				ClanSpinEnabled = false
+			end
+		end
+	})
 
 local ClanChooseSection = DailyTab:CreateSection({Name = "TròChơiNhânPhẩm", Side = "Right"})
 
@@ -151,7 +154,7 @@ ClanChooseSection:AddToggle({
     Callback = function(state)
         huntSupreme = state
     end,
-    State = true
+    State = false
 })
 end
 --// Variables \\--
@@ -1813,7 +1816,7 @@ plr.CharacterAdded:Connect(function()
     setMovementStats()
 end)
 
-
+local LastCharacter = game.Players.LocalPlayer.Character
 
 -- AutoBoss --
 local FarmLoop = nil
@@ -1925,21 +1928,24 @@ local function startFarmLoop()
     end)
 end
 
-game.Players.LocalPlayer.CharacterAdded:Connect(function()
-    if getgenv().Farm then
-        startFarmLoop()
-    end
-end)
 
 game:GetService("RunService").Heartbeat:Connect(function()
+    local player = game.Players.LocalPlayer
+    local currentCharacter = player.Character
     if getgenv().Farm and not FarmLoop then
         startFarmLoop()
     elseif not getgenv().Farm and FarmLoop then
         task.cancel(FarmLoop)
         FarmLoop = nil
+	elseif getgenv().Farm and FarmLoop and currentCharacter ~= LastCharacter then
+        LastCharacter = currentCharacter -- Cập nhật nhân vật mới
+        task.wait(4) -- Chờ 8 giây sau khi hồi sinh
+        getgenv().Farm = false
+        task.wait(1) -- Chờ một chút để đảm bảo toggle tắt
+        getgenv().Farm = true
+        startFarmLoop()
     end
 end)
-
 
 
 --MoveAround--
@@ -2015,14 +2021,26 @@ local function startMoveLoop()
     end)
 end
 
+
 game:GetService("RunService").Heartbeat:Connect(function()
+    local player = game.Players.LocalPlayer
+    local currentCharacter = player.Character
+
     if getgenv().MoveAround and not MoveLoop then
         startMoveLoop()
     elseif not getgenv().MoveAround and MoveLoop then
         task.cancel(MoveLoop)
         MoveLoop = nil
+    elseif getgenv().MoveAround and MoveLoop and currentCharacter ~= LastCharacter then
+        LastCharacter = currentCharacter -- Cập nhật nhân vật mới
+        task.wait(4) -- Chờ 8 giây sau khi hồi sinh
+        getgenv().MoveAround = false
+        task.wait(1) -- Chờ một chút để đảm bảo toggle tắt
+        getgenv().MoveAround = true
+        startMoveLoop()
     end
 end)
+
 
 
 --// Update Labels / Dropdowns \\--
