@@ -1808,14 +1808,6 @@ local function updateLabels()
     end
 end
 
-repeat task.wait() until plr.Character and plr.Character:FindFirstChild("HumanoidRootPart")
-local root = plr.Character:FindFirstChild("HumanoidRootPart")
-
-plr.CharacterAdded:Connect(function()
-    task.wait(0.5)
-    setMovementStats()
-end)
-
 local LastCharacter = game.Players.LocalPlayer.Character
 
 -- AutoBoss --
