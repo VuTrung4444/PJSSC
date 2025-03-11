@@ -1807,6 +1807,7 @@ local function updateLabels()
         infoLabel:Set(statText)
     end
 end
+
 local LastCharacter = game.Players.LocalPlayer.Character
 
 -- AutoBoss --
@@ -1886,6 +1887,7 @@ local function startFarmLoop()
             -- Kiểm tra boss còn sống không
             local bossEntity = getclosest({boss.Name}, game:GetService("Workspace").Mobs)
             task.wait(1)
+
             if bossEntity and bossEntity:FindFirstChild("Humanoid") then
                 while getgenv().Farm and bossEntity.Parent and bossEntity.Humanoid.Health > 0 do
                     if not game.Players.LocalPlayer.Character then
@@ -1893,23 +1895,22 @@ local function startFarmLoop()
                     end
                     task.wait()
 
-                    local entityCFrame
-if bossEntity and bossEntity:FindFirstChild("PrimaryPart") then
-    entityCFrame = CFrame.new(bossEntity.PrimaryPart.Position) * FarmModes
-else
-    entityCFrame = nil -- Đánh dấu không có vị trí hợp lệ
-end
+                    local entityCFrame = nil
+                    if bossEntity and bossEntity:FindFirstChild("PrimaryPart") then
+                        entityCFrame = CFrame.new(bossEntity.PrimaryPart.Position) * FarmModes
+                    end
 
-if entityCFrame then
-    if GetDistance(entityCFrame) >= 25 and GetDistance(entityCFrame) < 150 then
-        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = entityCFrame
-    else
-        if not TweenFa then
-            TweenFa = Tween(entityCFrame)
-        end
-    end
-    AtBoss = GetDistance(entityCFrame) < 25
-end
+                    if entityCFrame then
+                        if GetDistance(entityCFrame) >= 25 and GetDistance(entityCFrame) < 150 then
+                            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = entityCFrame
+                        else
+                            if not TweenFa then
+                                TweenFa = Tween(entityCFrame)
+                            end
+                        end
+                        AtBoss = GetDistance(entityCFrame) < 25
+                    end
+                end
             end
 
             VisitedBosses[boss.Name] = true
@@ -1921,6 +1922,7 @@ end
 game:GetService("RunService").Heartbeat:Connect(function()
     local player = game.Players.LocalPlayer
     local currentCharacter = player.Character
+
     if getgenv().Farm and not FarmLoop then
         startFarmLoop()
     elseif not getgenv().Farm and FarmLoop then
@@ -1937,6 +1939,7 @@ game:GetService("RunService").Heartbeat:Connect(function()
         startFarmLoop()
     end
 end)
+
 --MoveAround--
             
 local MoveLoop = nil
