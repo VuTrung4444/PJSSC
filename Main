@@ -1814,34 +1814,43 @@ plr.CharacterAdded:Connect(function()
 end)
 
 
---AutoBoss--
+
+-- AutoBoss --
 local FarmLoop = nil
 local VisitedBosses = {}
 
 local function startFarmLoop()
-    if FarmLoop then
-        FarmLoop:Disconnect()
-    end
-
+    if FarmLoop then return end -- Tránh chạy nhiều vòng lặp song song
+    
     FarmLoop = task.spawn(function()
-        local bossCount = #AllowedBosses
-        local function waitForCharacter()
-            local player = game.Players.LocalPlayer
-            while not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") do
-                player.CharacterAdded:Wait()
-                task.wait(1)
-            end
-        end
-
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait() -- Lấy nhân vật hiện tại
+        local rootPart = character:FindFirstChild("HumanoidRootPart")
+        local lastCharacter = character -- Lưu lại nhân vật cũ để kiểm tra thay đổi
+        
         while getgenv().Farm do
-            waitForCharacter()
+            -- Nếu nhân vật thay đổi (chết/reset), cập nhật lại character, rootPart, và làm mới TweenFa
+            if character ~= player.Character then
+                character = player.Character or player.CharacterAdded:Wait()
+                rootPart = character:FindFirstChild("HumanoidRootPart")
+                lastCharacter = character
+                
+                -- Hủy tween cũ nếu có
+                if TweenFa then
+                    TweenFa:Cancel()
+                    TweenFa = nil
+                end
+            end
+
+            -- Cập nhật danh sách boss còn lại
             UpdateActiveBossLocations()
 
-            if bossCount == 0 then
+            if #ActiveBossLocations == 0 then
                 task.wait(1)
                 continue
             end
 
+            -- Tìm boss chưa thăm gần nhất
             local candidateBosses = {}
             for _, boss in pairs(ActiveBossLocations) do
                 if not VisitedBosses[boss.Name] then
@@ -1854,6 +1863,7 @@ local function startFarmLoop()
                 candidateBosses = ActiveBossLocations
             end
 
+            -- Sắp xếp boss theo khoảng cách
             table.sort(candidateBosses, function(a, b)
                 return GetDistance(a.Position) < GetDistance(b.Position)
             end)
@@ -1866,8 +1876,9 @@ local function startFarmLoop()
 
             local bossCFrame = CFrame.new(boss.Position)
             local TweenFa = Tween(bossCFrame)
-		AtBoss = false
+            AtBoss = false
 
+            -- Di chuyển đến boss
             repeat
                 task.wait()
                 if not game.Players.LocalPlayer.Character then
@@ -1885,6 +1896,7 @@ local function startFarmLoop()
                 TweenFa = nil
             end
 
+            -- Kiểm tra boss còn sống không
             local bossEntity = getclosest({boss.Name}, game:GetService("Workspace").Mobs)
             if bossEntity and bossEntity:FindFirstChild("Humanoid") then
                 while getgenv().Farm and bossEntity.Parent and bossEntity.Humanoid.Health > 0 do
@@ -1893,7 +1905,7 @@ local function startFarmLoop()
                     end
                     task.wait()
 
-                    local entityCFrame = bossEntity:GetModelCFrame() * FarmModes
+                    local entityCFrame = CFrame.new(bossEntity:GetModelCFrame().Position) * FarmModes -- Giữ góc Y cố định
                     if GetDistance(entityCFrame) >= 25 and GetDistance(entityCFrame) < 150 then
                         game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = entityCFrame
                     else
@@ -1908,7 +1920,7 @@ local function startFarmLoop()
             end
 
             VisitedBosses[boss.Name] = true
-	UpdateActiveBossLocations()
+            UpdateActiveBossLocations()
         end
     end)
 end
@@ -2049,10 +2061,11 @@ local AutoCollectLilys = false
 local failedFlowers = {}
 local collectingThread = nil
 
+if not lastFlowerCollectedTime or type(lastFlowerCollectedTime) ~= "number" then
+    lastFlowerCollectedTime = tick() or 0
+end
 
-local lastFlowerCollectedTime = tick()
 local resetting = false
-
 
 local function EnableAntiFall()
     local hrp = Player.Character and Player.Character:FindFirstChild("HumanoidRootPart")
@@ -2081,7 +2094,6 @@ local function DisableAntiFall()
         humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
     end
 end
-
 
 local function isCharacterValid()
     local character = Player.Character
@@ -2124,47 +2136,94 @@ local function getNearestFlower()
 end
 
 local function safeMoveToFlower(flower)
-    if not flower or not flower.Parent then return false end
+    if not flower or not flower.Parent then 
+        return false 
+    end
 
-    local tween, duration = TweenToPosition(flower.WorldPivot.Position, 250)
+    local position = flower.WorldPivot and flower.WorldPivot.Position
+    if not position then
+        return false
+    end
+
+    local tween, duration = TweenToPosition(position, 250)
+    if not tween then
+        return false
+    end
+
     local start = tick()
 
     while tick() - start < duration + 1 do
         task.wait()
-        if not isCharacterValid() or not flower.Parent then
+
+        if not isCharacterValid() then
             tween:Cancel()
             return false
         end
-        if tween.PlaybackState ~= Enum.PlaybackState.Playing then break end
-    end
 
-    tween:Cancel()
-    return isCharacterValid()
-end
+        if not flower.Parent then
+            tween:Cancel()
+            return false
+        end
 
-local function tryCollectFlower(flower)
-     if not flower or type(flower) ~= "Instance" or not flower.Parent then 
-        return true
-    end
-
-    for _, obj in ipairs(flower:GetDescendants()) do
-        if obj:IsA("ProximityPrompt") then
-            task.wait(0.2)
-            for _ = 1, 3 do
-                fireproximityprompt(obj)
-                task.wait(0.2)
-                if not flower.Parent then return true end
-            end
+        if tween.PlaybackState ~= Enum.PlaybackState.Playing then 
+            break 
         end
     end
 
-    local timeout = tick() + 3
-    while tick() < timeout do
-        if not flower.Parent then return true end
-        task.wait(0.2)
+    tween:Cancel()
+    local result = isCharacterValid()
+    return result
+end
+
+local function tryCollectFlower(flower)
+    if not flower or not flower:IsA("Model") or not flower.Parent then 
+        return false
     end
+
+    -- Kiểm tra xem có prompt trong hoa không
+    local prompt = nil
+    for _, obj in ipairs(flower:GetDescendants()) do
+        if obj:IsA("ProximityPrompt") then
+            prompt = obj
+            break
+        end
+    end
+
+    if not prompt then
+        return false
+    end
+
+    -- Kiểm tra nhân vật đã đến gần chưa (dưới 5 đơn vị)
+    local hrp = Player.Character and Player.Character:FindFirstChild("HumanoidRootPart")
+    if not hrp then return false end
+
+    local distance = (hrp.Position - flower:GetPivot().Position).Magnitude
+    if distance > 5 then
+        return false
+    end
+
+    -- Chắc chắn rằng prompt có thể kích hoạt
+    prompt.HoldDuration = 0
+    prompt.MaxActivationDistance = 10  -- Đảm bảo prompt luôn hoạt động
+    
+	task.wait(0.2)
+    for i = 1, 3 do
+        fireproximityprompt(prompt)
+        task.wait(0.5)
+        if not flower.Parent then 
+            return true 
+        end
+    end
+
+    -- Kiểm tra lần cuối
+    task.wait(1)
+    if not flower.Parent then
+        return true
+    end
+
     return false
 end
+
 
 local function resetCharacter()
     if resetting or not isCharacterValid() then return end
@@ -2180,7 +2239,6 @@ local function resetCharacter()
     resetting = false
 end
 
-
 local function startCollecting()
     if collectingThread then return end
 
@@ -2191,7 +2249,6 @@ local function startCollecting()
         while AutoCollectLilys do
             if not isCharacterValid() then repeat task.wait(1) until isCharacterValid() end
 
-            -- Clean failed flowers cache
             for flower, lastFail in pairs(failedFlowers) do
                 if not flower.Parent or tick() - lastFail > 30 then
                     failedFlowers[flower] = nil
@@ -2222,6 +2279,7 @@ local function startCollecting()
         collectingThread = nil
     end)
 end
+
 
 local function stopCollecting()
     AutoCollectLilys = false
