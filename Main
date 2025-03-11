@@ -1895,8 +1895,9 @@ if bossEntity and bossEntity:FindFirstChild("Humanoid") and bossEntity:FindFirst
                     end
                     task.wait()
 
-                    if bossEntity and bossEntity.PrimaryPart then
-    local entityCFrame = CFrame.new(bossEntity.PrimaryPart.Position) * FarmModes
+                    local entityCFrame
+if bossEntity and bossEntity.PrimaryPart then
+    entityCFrame = CFrame.new(bossEntity.PrimaryPart.Position) * FarmModes
 else
     task.wait(0.5)
     continue
