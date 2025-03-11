@@ -1895,12 +1895,9 @@ local function startFarmLoop()
                     end
                     task.wait()
 
-                    local entityCFrame = nil
-                    if bossEntity and bossEntity:FindFirstChild("PrimaryPart") then
-                        entityCFrame = CFrame.new(bossEntity.PrimaryPart.Position) * FarmModes
-                    end
-
-                    if entityCFrame then
+                    if bossEntity:FindFirstChild("PrimaryPart") then
+                        local entityCFrame = CFrame.new(bossEntity.PrimaryPart.Position) * FarmModes
+                        
                         if GetDistance(entityCFrame) >= 25 and GetDistance(entityCFrame) < 150 then
                             game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = entityCFrame
                         else
