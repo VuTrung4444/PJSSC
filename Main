@@ -1934,8 +1934,8 @@ game:GetService("RunService").Heartbeat:Connect(function()
         task.cancel(FarmLoop)
         FarmLoop = nil
 	elseif getgenv().Farm and FarmLoop and currentCharacter ~= LastCharacter then
-        LastCharacter = currentCharacter -- Cập nhật nhân vật mới
-        task.wait(4) -- Chờ 8 giây sau khi hồi sinh
+        
+        task.wait(4) -- Chờ 4 giây sau khi hồi sinh
         getgenv().Farm = false
 task.cancel(FarmLoop)
         FarmLoop = nil
@@ -1957,6 +1957,7 @@ local function startMoveLoop()
     end
     
     MoveLoop = task.spawn(function()
+LastCharacter = currentCharacter -- Cập nhật nhân vật mới
         while getgenv().MoveAround do
             local player = game.Players.LocalPlayer
             if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then
@@ -2030,8 +2031,8 @@ game:GetService("RunService").Heartbeat:Connect(function()
         task.cancel(MoveLoop)
         MoveLoop = nil
     elseif getgenv().MoveAround and MoveLoop and currentCharacter ~= LastCharacter then
-        LastCharacter = currentCharacter -- Cập nhật nhân vật mới
-        task.wait(4) -- Chờ 8 giây sau khi hồi sinh
+     
+        task.wait(4) -- Chờ 4 giây sau khi hồi sinh
         getgenv().MoveAround = false
 task.cancel(MoveLoop)
         MoveLoop = nil
