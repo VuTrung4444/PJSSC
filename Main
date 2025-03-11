@@ -1887,7 +1887,11 @@ local function startFarmLoop()
             local bossEntity = getclosest({boss.Name}, game:GetService("Workspace").Mobs)
 task.wait(1)
             if bossEntity and bossEntity:FindFirstChild("Humanoid") and bossEntity.PrimaryPart then
-                while getgenv().Farm and bossEntity.Parent and bossEntity.Humanoid.Health > 0 do
+                while getgenv().Farm do
+    if not bossEntity or not bossEntity.Parent or not bossEntity:FindFirstChild("Humanoid") or bossEntity.Humanoid.Health <= 0 then
+        break -- Thoát vòng lặp ngay lập tức nếu boss mất
+    end
+task.wait()
                     if not game.Players.LocalPlayer.Character then
                         break
                     end
@@ -1898,15 +1902,12 @@ task.wait(1)
                     if GetDistance(entityCFrame) >= 25 and GetDistance(entityCFrame) < 150 then
                         game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = entityCFrame
                     else
-                        if not TweenFa or (TweenFa.Goal ~= entityCFrame and GetDistance(entityCFrame) > 5) then
-                            if TweenFa then
-                                TweenFa:Cancel() -- Hủy tween cũ nếu cần
-                            end
-                            TweenFa = Tween(entityCFrame) -- Tạo tween mới nếu cần
-                        end
-                    end
-                    AtBoss = GetDistance(entityCFrame) < 25
-                end
+                        if not TweenFa or (TweenFa and (not TweenFa.Goal or GetDistance(TweenFa.Goal.p, entityCFrame.p) > 5)) then
+    if TweenFa then
+        TweenFa:Cancel()
+    end
+    TweenFa = Tween(entityCFrame)
+end
             end
 
             VisitedBosses[boss.Name] = true
@@ -1923,9 +1924,9 @@ game:GetService("RunService").Heartbeat:Connect(function()
     elseif not getgenv().Farm and FarmLoop then
         task.cancel(FarmLoop)
         FarmLoop = nil
-    elseif getgenv().Farm and currentCharacter ~= LastCharacter and FarmLoop then
-        task.wait(4) -- Chờ 4 giây sau khi hồi sinh
-        LastCharacter = currentCharacter -- Cập nhật nhân vật mới
+    elseif getgenv().Farm and FarmLoop and currentCharacter ~= LastCharacter then
+    LastCharacter = currentCharacter -- Cập nhật ngay lập tức
+    task.wait(4) -- Đợi 4 giây sau hồi sinh rồi mới xử lý tiếp
         getgenv().Farm = false
         task.cancel(FarmLoop)
         FarmLoop = nil
