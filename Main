@@ -1908,7 +1908,7 @@ local function startFarmLoop()
                     end
                     task.wait()
 
-                    local entityCFrame = CFrame.new(bossEntity:GetModelCFrame().Position) * FarmModes -- Giữ góc Y cố định
+                    local entityCFrame = CFrame.new(bossEntity.PrimaryPart.Position) * FarmModes
                     if GetDistance(entityCFrame) >= 25 and GetDistance(entityCFrame) < 150 then
                         game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = entityCFrame
                     else
