@@ -1895,19 +1895,21 @@ local function startFarmLoop()
 
                     local entityCFrame
 if bossEntity and bossEntity:FindFirstChild("PrimaryPart") then
-    entityCFrame = CFrame.new(bossEntity:GetModelCFrame().Position) * FarmModes
+    entityCFrame = CFrame.new(bossEntity.PrimaryPart.Position) * FarmModes
 else
-    task.wait(0.5) -- Chờ boss load lại rồi tiếp tục
+    entityCFrame = nil -- Đánh dấu không có vị trí hợp lệ
 end
-                    if GetDistance(entityCFrame) >= 25 and GetDistance(entityCFrame) < 150 then
-                        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = entityCFrame
-                    else
-                        if not TweenFa then
-                            TweenFa = Tween(entityCFrame)
-                        end
-                    end
-                    AtBoss = GetDistance(entityCFrame) < 25
-                end
+
+if entityCFrame then
+    if GetDistance(entityCFrame) >= 25 and GetDistance(entityCFrame) < 150 then
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = entityCFrame
+    else
+        if not TweenFa then
+            TweenFa = Tween(entityCFrame)
+        end
+    end
+    AtBoss = GetDistance(entityCFrame) < 25
+end
             end
 
             VisitedBosses[boss.Name] = true
