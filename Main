@@ -1913,8 +1913,11 @@ local function startFarmLoop()
                         game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = entityCFrame
                     else
                         if not TweenFa then
-                            TweenFa = Tween(entityCFrame)
-                        end
+    TweenFa = Tween(entityCFrame)
+elseif TweenFa then
+    TweenFa:Cancel() -- Hủy tween cũ
+    TweenFa = Tween(entityCFrame) -- Tạo tween mới
+end
                     end
                     AtBoss = GetDistance(entityCFrame) < 25
                 end
