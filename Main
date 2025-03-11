@@ -1895,7 +1895,7 @@ local function startFarmLoop()
                     end
                     task.wait()
 
-                    if bossEntity:FindFirstChild("PrimaryPart") then
+                    if bossEntity.PrimaryPart then -- Kiểm tra tránh nil trước khi dùng
                         local entityCFrame = CFrame.new(bossEntity.PrimaryPart.Position) * FarmModes
                         
                         if GetDistance(entityCFrame) >= 25 and GetDistance(entityCFrame) < 150 then
