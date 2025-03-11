@@ -1830,14 +1830,8 @@ local function startFarmLoop()
         local character = player.Character or player.CharacterAdded:Wait() -- Lấy nhân vật hiện tại
         local rootPart = character:FindFirstChild("HumanoidRootPart")
         local lastCharacter = character -- Lưu lại nhân vật cũ để kiểm tra thay đổi
-        
-        while getgenv().Farm do
-            -- Nếu nhân vật thay đổi (chết/reset), cập nhật lại character, rootPart, và làm mới TweenFa
-            if character ~= player.Character then
-                character = player.Character or player.CharacterAdded:Wait()
-                rootPart = character:FindFirstChild("HumanoidRootPart")
-                lastCharacter = character
-                
+
+
                 -- Hủy tween cũ nếu có
                 if TweenFa then
                     TweenFa:Cancel()
@@ -1845,6 +1839,7 @@ local function startFarmLoop()
                 end
             end
 
+        while getgenv().Farm do
             -- Cập nhật danh sách boss còn lại
             UpdateActiveBossLocations()
 
