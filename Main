@@ -1941,7 +1941,9 @@ game:GetService("RunService").Heartbeat:Connect(function()
         LastCharacter = currentCharacter -- Cập nhật nhân vật mới
         task.wait(4) -- Chờ 8 giây sau khi hồi sinh
         getgenv().Farm = false
-        task.wait(1) -- Chờ một chút để đảm bảo toggle tắt
+task.cancel(FarmLoop)
+        FarmLoop = nil
+        task.wait(2) -- Chờ một chút để đảm bảo toggle tắt
         getgenv().Farm = true
         startFarmLoop()
     end
@@ -2035,7 +2037,9 @@ game:GetService("RunService").Heartbeat:Connect(function()
         LastCharacter = currentCharacter -- Cập nhật nhân vật mới
         task.wait(4) -- Chờ 8 giây sau khi hồi sinh
         getgenv().MoveAround = false
-        task.wait(1) -- Chờ một chút để đảm bảo toggle tắt
+task.cancel(MoveLoop)
+        MoveLoop = nil
+        task.wait(2) -- Chờ một chút để đảm bảo toggle tắt
         getgenv().MoveAround = true
         startMoveLoop()
     end
