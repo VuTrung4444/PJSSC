@@ -1939,7 +1939,8 @@ end)
 
 --MoveAround--
 local MoveLoop = nil
-local VisitedBosses = {}
+local AllBosses = {}  -- Danh sách tất cả boss có thể farm
+local VisitedBosses = {}  -- Danh sách các boss đã ghé thăm
 
 local function startMoveLoop()
     if MoveLoop then
@@ -1947,7 +1948,7 @@ local function startMoveLoop()
     end
     
     MoveLoop = task.spawn(function()
-LastCharacter = currentCharacter -- Cập nhật nhân vật mới
+        LastCharacter = currentCharacter -- Cập nhật nhân vật mới
         while getgenv().MoveAround do
             local player = game.Players.LocalPlayer
             if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then
@@ -1961,6 +1962,13 @@ LastCharacter = currentCharacter -- Cập nhật nhân vật mới
                 continue
             end
 
+            -- Cập nhật danh sách tất cả boss nếu chưa có
+            if #AllBosses == 0 then
+                for _, boss in pairs(ActiveBossLocations) do
+                    table.insert(AllBosses, boss)
+                end
+            end
+
             local candidateBosses = {}
             for _, boss in pairs(ActiveBossLocations) do
                 if not VisitedBosses[boss.Name] then
@@ -1968,8 +1976,9 @@ LastCharacter = currentCharacter -- Cập nhật nhân vật mới
                 end
             end
 
+            -- Nếu đã đi hết boss, reset danh sách VisitedBosses
             if #candidateBosses == 0 then
-                VisitedBosses = {} -- Reset lại khi đi hết boss
+                VisitedBosses = {}
                 candidateBosses = ActiveBossLocations
             end
 
@@ -2004,12 +2013,10 @@ LastCharacter = currentCharacter -- Cập nhật nhân vật mới
             end
 
             VisitedBosses[boss.Name] = true
-	UpdateActiveBossLocations()
             task.wait(1) -- Dừng 1 giây trước khi đi tiếp boss khác
         end
     end)
 end
-
 
 game:GetService("RunService").Heartbeat:Connect(function()
     local player = game.Players.LocalPlayer
@@ -2035,8 +2042,6 @@ game:GetService("RunService").Heartbeat:Connect(function()
         end
     end
 end)
-
-
 
 
 --// Update Labels / Dropdowns \\--
