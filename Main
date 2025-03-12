@@ -1938,7 +1938,6 @@ game:GetService("RunService").Heartbeat:Connect(function()
 end)
 
 --MoveAround--
-            
 local MoveLoop = nil
 local VisitedBosses = {}
 
@@ -2022,17 +2021,21 @@ game:GetService("RunService").Heartbeat:Connect(function()
         task.cancel(MoveLoop)
         MoveLoop = nil
     elseif getgenv().MoveAround and MoveLoop and currentCharacter ~= LastCharacter then
-     
+        LastCharacter = currentCharacter -- Cập nhật nhân vật mới
         task.wait(4) -- Chờ 4 giây sau khi hồi sinh
-LastCharacter = currentCharacter -- Cập nhật nhân vật mới
-        getgenv().MoveAround = false
-task.cancel(MoveLoop)
-        MoveLoop = nil
+
+        if MoveLoop then -- Kiểm tra kỹ xem MoveLoop có còn tồn tại không trước khi hủy
+            task.cancel(MoveLoop)
+            MoveLoop = nil
+        end
+
         task.wait(2) -- Chờ một chút để đảm bảo toggle tắt
-        getgenv().MoveAround = true
-        startMoveLoop()
+        if getgenv().MoveAround then -- Đảm bảo MoveAround vẫn đang bật
+            startMoveLoop()
+        end
     end
 end)
+
 
 
 
