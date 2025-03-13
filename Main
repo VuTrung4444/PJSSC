@@ -2071,7 +2071,17 @@ spawn(function()
     end
 end)
 
----Nhặt Hoa---
+--Nhặt Hoa--
+spawn(function()
+    while true do
+        wait(naturalWaitTime()) 
+        if Players.LocalPlayer and Players.LocalPlayer.Character then
+            VirtualUser:CaptureController()
+            VirtualUser:ClickButton2(Vector2.new(math.random(100, 1820), math.random(100, 980))) 
+        end
+    end
+end)
+
 local TweenService = game:GetService("TweenService")
 local flowers = game:GetService("Workspace"):WaitForChild("Demon_Flowers_Spawn")
 local Player = game.Players.LocalPlayer
@@ -2079,40 +2089,6 @@ local Player = game.Players.LocalPlayer
 local AutoCollectLilys = false
 local failedFlowers = {}
 local collectingThread = nil
-
-if not lastFlowerCollectedTime or type(lastFlowerCollectedTime) ~= "number" then
-    lastFlowerCollectedTime = tick() or 0
-end
-
-local resetting = false
-
-local function EnableAntiFall()
-    local hrp = Player.Character and Player.Character:FindFirstChild("HumanoidRootPart")
-    if hrp and not hrp:FindFirstChild("BodyVelocity") then
-        local antifall = Instance.new("BodyVelocity")
-        antifall.Velocity = Vector3.new(0, 0, 0)
-        antifall.MaxForce = Vector3.new(9e9, 9e9, 9e9)
-        antifall.Name = "BodyVelocity"
-        antifall.Parent = hrp
-    end
-end
-
-local function DisableAntiFall()
-    local hrp = Player.Character and Player.Character:FindFirstChild("HumanoidRootPart")
-    local humanoid = Player.Character and Player.Character:FindFirstChildOfClass("Humanoid")
-    local antifall = hrp and hrp:FindFirstChild("BodyVelocity")
-
-    if antifall then antifall:Destroy() end
-    if hrp then
-        hrp.Velocity, hrp.AssemblyLinearVelocity = Vector3.zero, Vector3.zero
-    end
-    if humanoid then
-        humanoid.PlatformStand = false
-        humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
-        task.wait(0.1)
-        humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-    end
-end
 
 local function isCharacterValid()
     local character = Player.Character
@@ -2147,16 +2123,28 @@ local function TweenToPosition(pos, speed)
     return tween, distance / speed
 end
 
+local function getFlowerPosition(flower)
+    if not flower or not flower.Parent then return nil end
+    local success, pos = pcall(function() return flower:GetPivot().Position end)
+    if success and pos and pos.Magnitude < 10000 then -- Tránh giá trị ảo
+        return pos
+    end
+    return nil
+end
+
 local function getNearestFlower()
     local hrp = Player.Character and Player.Character:FindFirstChild("HumanoidRootPart")
     if not hrp then return nil end
 
     local nearest, minDist = nil, math.huge
     for _, flower in pairs(flowers:GetChildren()) do
-        if flower:IsA("Model") and (not failedFlowers[flower] or tick() - failedFlowers[flower] > 30) then
-            local dist = (hrp.Position - flower.WorldPivot.Position).Magnitude
-            if dist < minDist then
-                nearest, minDist = flower, dist
+        if flower:IsA("Model") and flower.Parent and (not failedFlowers[flower] or tick() - failedFlowers[flower] > 30) then
+            local pos = getFlowerPosition(flower)
+            if pos then
+                local dist = (hrp.Position - pos).Magnitude
+                if dist < minDist then
+                    nearest, minDist = flower, dist
+                end
             end
         end
     end
@@ -2164,33 +2152,21 @@ local function getNearestFlower()
 end
 
 local function safeMoveToFlower(flower)
-    if not flower or not flower.Parent then 
-        return false 
-    end
+    if not flower or not flower.Parent then return false end
 
-    local position = flower.WorldPivot and flower.WorldPivot.Position
-    if not position then
-        return false
-    end
+    local position = getFlowerPosition(flower)
+    if not position then return false end
 
     local attempts = 0
-    while attempts < 3 do  -- Giới hạn 3 lần thử di chuyển đến hoa
+    while attempts < 3 do
         local tween, duration = TweenToPosition(position, 250)
-        if not tween then
-            return false
-        end
+        if not tween then return false end
 
         local start = tick()
-
         while tick() - start < duration + 1 do
             task.wait()
 
-            if not isCharacterValid() then
-                tween:Cancel()
-                return false
-            end
-
-            if not flower.Parent then
+            if not isCharacterValid() or not flower.Parent or not AutoCollectLilys then
                 tween:Cancel()
                 return false
             end
@@ -2206,7 +2182,7 @@ local function safeMoveToFlower(flower)
         end
 
         attempts = attempts + 1
-        task.wait(0.2)  -- Chờ một chút trước khi thử lại
+        task.wait(0.2)
     end
 
     return false
@@ -2232,8 +2208,8 @@ local function tryCollectFlower(flower)
     local hrp = Player.Character and Player.Character:FindFirstChild("HumanoidRootPart")
     if not hrp then return false end
 
-    local distance = (hrp.Position - flower:GetPivot().Position).Magnitude
-    if distance > 5 then
+    local position = getFlowerPosition(flower)
+    if not position or (hrp.Position - position).Magnitude > 5 then
         return false
     end
 
@@ -2260,8 +2236,7 @@ end
 local function startCollecting()
     if collectingThread then return end
 
-    AutoCollectLilys, lastFlowerCollectedTime = true, tick()
-    EnableAntiFall()
+    AutoCollectLilys = true
 
     collectingThread = task.spawn(function()
         while AutoCollectLilys do
@@ -2281,15 +2256,12 @@ local function startCollecting()
 
             if safeMoveToFlower(flower) and tryCollectFlower(flower) then
                 failedFlowers[flower] = nil
-                lastFlowerCollectedTime = tick()
             else
                 failedFlowers[flower] = tick()
             end
 
             task.wait(0.2)
         end
-
-        DisableAntiFall()
         collectingThread = nil
     end)
 end
@@ -2300,7 +2272,25 @@ local function stopCollecting()
         task.cancel(collectingThread)
         collectingThread = nil
     end
-    DisableAntiFall()
+
+    -- Hủy mọi tween để nhân vật có thể di chuyển lại
+    if getgenv().currentTween then
+        getgenv().currentTween:Cancel()
+        getgenv().currentTween = nil
+    end
+
+    local hrp = Player.Character and Player.Character:FindFirstChild("HumanoidRootPart")
+    local humanoid = Player.Character and Player.Character:FindFirstChildOfClass("Humanoid")
+
+    if hrp then
+        hrp.Velocity, hrp.AssemblyLinearVelocity = Vector3.zero, Vector3.zero
+    end
+    if humanoid then
+        humanoid.PlatformStand = false
+        humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+        task.wait(0.1)
+        humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+    end
 end
 
 MiscSection:AddToggle({
@@ -2311,7 +2301,6 @@ MiscSection:AddToggle({
         if v then startCollecting() else stopCollecting() end
     end
 })
-
 
 --FindMuzan--
 local teleportToMuzanEnabled = false
