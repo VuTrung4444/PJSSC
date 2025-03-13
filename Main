@@ -2149,6 +2149,11 @@ local function TweenToPosition(pos, speed)
     local hrp = Player.Character and Player.Character:FindFirstChild("HumanoidRootPart")
     if not hrp then return nil, 0 end
 
+    -- Kiểm tra vị trí hợp lệ trước khi tạo Tween
+    if not pos or pos.Y < -500 or pos.Magnitude > 10000 then
+        return nil, 0
+    end
+
     local distance = (hrp.Position - pos).Magnitude
     local tweenInfo = TweenInfo.new(distance / speed, Enum.EasingStyle.Linear)
 
@@ -2167,7 +2172,9 @@ end
 local function getFlowerPosition(flower)
     if not flower or not flower.Parent then return nil end
     local success, pos = pcall(function() return flower:GetPivot().Position end)
-    if success and pos and pos.Magnitude < 10000 then -- Tránh giá trị ảo
+
+    -- Kiểm tra xem pos có hợp lệ không trước khi trả về
+    if success and pos and pos.Y > -500 and pos.Magnitude < 10000 then
         return pos
     end
     return nil
@@ -2218,6 +2225,15 @@ local function safeMoveToFlower(flower)
         end
 
         tween:Cancel()
+        
+        -- Reset vận tốc để tránh bay ra ngoài map
+        if isCharacterValid() then
+            local hrp = Player.Character:FindFirstChild("HumanoidRootPart")
+            if hrp then
+                hrp.Velocity, hrp.AssemblyLinearVelocity = Vector3.zero, Vector3.zero
+            end
+        end
+
         if isCharacterValid() then
             return true
         end
@@ -2314,23 +2330,20 @@ local function stopCollecting()
         collectingThread = nil
     end
 
-    -- Hủy mọi tween để nhân vật có thể di chuyển lại
+    -- Hủy Tween hiện tại để tránh lỗi
     if getgenv().currentTween then
         getgenv().currentTween:Cancel()
         getgenv().currentTween = nil
     end
 
     local hrp = Player.Character and Player.Character:FindFirstChild("HumanoidRootPart")
-    local humanoid = Player.Character and Player.Character:FindFirstChildOfClass("Humanoid")
 
     if hrp then
         hrp.Velocity, hrp.AssemblyLinearVelocity = Vector3.zero, Vector3.zero
-    end
-    if humanoid then
-        humanoid.PlatformStand = false
-        humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
-        task.wait(0.1)
-        humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+        -- Reset vị trí nếu bị bay ra ngoài map
+        if hrp.Position.Y < -500 then
+            hrp.CFrame = CFrame.new(workspace.SpawnLocation.Position + Vector3.new(0, 5, 0))
+        end
     end
 end
 
