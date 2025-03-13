@@ -659,7 +659,7 @@ local Settings = MainTab:CreateSection({Name = "Settings"})
 local KillAura = MainTab:CreateSection({Name = "Kill Aura", Side = "Right"})
 local Teleports = MainTab:CreateSection({Name = "Teleports", Side = "Right"})
 local Info = MainTab:CreateSection({Name = "Info", Side = "Right"})
-local TitlesTab = MainTab:CreateSection({Name = "Titles", Side = "Left"})
+local AuraTab = MainTab:CreateSection({Name = "AuraSkills", Side = "Left"})
 
 
 --// Misc Tab \\--
@@ -1936,6 +1936,47 @@ game:GetService("RunService").Heartbeat:Connect(function()
         startFarmLoop()
     end
 end)
+
+AuraTab:AddToggle({
+    Name = "Swamp Aura [Near Mobs]",
+    Flag = "Swamp",
+    Callback = function(v)
+        getgenv().Swamp = v
+        if v then
+            task.spawn(function()
+                while getgenv().Swamp do 
+                    local bossEntity = getclosest(AllowedBosses, game:GetService("Workspace").Mobs)
+                    
+                    if bossEntity and bossEntity:FindFirstChild("Humanoid") and bossEntity.Humanoid.Health > 0 then
+                        local bossCFrame = bossEntity:GetModelCFrame()
+
+                        local args = {
+                            [1] = "swamp_puddle_damage",
+                            [2] = game.Players.LocalPlayer.Character,
+                            [3] = bossCFrame
+                        }          
+                        game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))                
+                    end
+                    task.wait(0.3)
+                end
+            end)
+            task.spawn(function()
+                while getgenv().Swamp do
+                    local args = {
+                        [1] = "skil_ting_asd",
+                        [2] = game.Players.LocalPlayer,
+                        [3] = "swampbda_swamp_puddle",
+                        [4] = 5
+                    }
+                    game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))        
+                    task.wait(9.5)
+                end
+            end)
+        end
+    end
+})
+
+
 
 --MoveAround--
 local MoveLoop = nil
