@@ -1561,7 +1561,7 @@ function startArrow275Loop()
                     )
                 end
             end
-            task.wait(0.275)
+            task.wait(0.3)
         end
         resetArrow275()
     end)
