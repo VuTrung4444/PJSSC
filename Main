@@ -723,7 +723,92 @@ MainSection:AddToggle({
     end
 })
 
+MainSection:AddTextbox({
+    Name = 'Player Target',
+    Placeholder = '...',
+    Flag = 'Player Name',
+    Callback = function(v)
+        getgenv().selectedPlayerName = v
+    end
+})
 
+MainSection:AddToggle({
+    Name = "Arrow Aura [Target Player]",
+    Flag = "ArrowTargeted",
+    Callback = function (v)
+        getgenv().TargetPlayersArrow = v
+    end
+})
+
+
+function findPlayerByName(name)
+    for _, player in pairs(game.Players:GetPlayers()) do
+        if player.Name == name and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            return player.Character
+        end
+    end
+    return nil
+end
+
+-- Vòng lặp gây sát thương
+spawn(function()
+    while task.wait(1) do
+        if getgenv().TargetPlayersArrow then
+            local selectedPlayerName = getgenv().selectedPlayerName
+            if selectedPlayerName and selectedPlayerName ~= "" then
+                local target = findPlayerByName(selectedPlayerName)
+
+                if target then
+                    local targetCFrame = target:GetModelCFrame()
+                    local humanoid = target:FindFirstChildOfClass("Humanoid")
+
+                    if targetCFrame and humanoid and humanoid.Health > 0 then
+                        for i = 1, 5 do
+                            game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S_:InvokeServer(
+                                "arrow_knock_back_damage",
+                                game.Players.LocalPlayer.Character,
+                                targetCFrame,
+                                target,
+                                200,
+                                200
+                            )
+							task.wait(0.4)
+                        end
+                    end
+                end
+            end
+        end
+    end
+end)
+
+
+
+-- Vòng lặp teleport đến người chơi mục tiêu
+MainSection:AddToggle({
+    Name = "Teleport to Target",
+    Flag = "TargetPlayersTeleport",
+    Callback = function(state)
+        if state then
+            local selectedPlayerName = getgenv().selectedPlayerName
+            if selectedPlayerName and selectedPlayerName ~= "" then
+                local target = workspace:FindFirstChild(selectedPlayerName)
+                
+                if target and target:FindFirstChild("HumanoidRootPart") then
+                    local playerCharacter = game.Players.LocalPlayer.Character
+                    if playerCharacter and playerCharacter:FindFirstChild("HumanoidRootPart") then
+                        local targetPosition = target.HumanoidRootPart.Position
+                        local newPosition = Vector3.new(targetPosition.X, targetPosition.Y + 150, targetPosition.Z)
+                        
+                        -- Đảm bảo HumanoidRootPart tồn tại trước khi MoveTo để tránh lỗi
+                        if playerCharacter:FindFirstChild("HumanoidRootPart") then
+                            playerCharacter:MoveTo(newPosition)
+                        end
+                    end
+                end
+            end
+        end
+    end
+})
 
 --// Settings \\--
 Settings:AddDropdown({
@@ -1499,7 +1584,7 @@ end)
 
 spawn(function()
     while task.wait() do
-        if getgenv().Arrow or getgenv().AllArrow then
+        if getgenv().Arrow or getgenv().TargetPlayersArrow or getgenv().AllArrow then
             if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
                 game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S_:InvokeServer("skil_ting_asd",game:GetService("Players").LocalPlayer,"arrow_knock_back",5)
 				task.wait(10)
