@@ -1907,7 +1907,44 @@ AuraTab:AddToggle({
     end
 })
 
+AuraTab:AddToggle({
+    Name = "Reaper Aura [Near Mobs]",
+    Flag = "Reaper",
+    Callback = function(v)
+        getgenv().Reaper = v
+        if v then
+            task.spawn(function()
+                while getgenv().Reaper do 
+                    local bossEntity = getclosest(AllowedBosses, game:GetService("Workspace").Mobs)
+                    
+                    if bossEntity and bossEntity:FindFirstChild("Humanoid") and bossEntity.Humanoid.Health > 0 then
+                        local bossCFrame = bossEntity:GetModelCFrame()
 
+                        local args = {
+                            [1] = "reaper-slash_thing_damage",
+                            [2] = game.Players.LocalPlayer.Character,
+                            [3] = bossCFrame
+                        }          
+                        game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))                
+                    end
+                    task.wait(1)
+                end
+            end)
+            task.spawn(function()
+                while getgenv().Reaper do
+                    local args = {
+                        [1] = "skil_ting_asd",
+                        [2] = game.Players.LocalPlayer,
+                        [3] = "reaperbda_reapofdispair",
+                        [4] = 5
+                    }
+                    game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))        
+                    task.wait(7.5)
+                end
+            end)
+        end
+    end
+})
 
 --MoveAround--
 local MoveLoop = nil
