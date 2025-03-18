@@ -1594,8 +1594,6 @@ spawn(function()
 end)
 
 
-
-
 --AuraArrow[NoLag]--
 local plr = game.Players.LocalPlayer
 local lastCharacter = nil
@@ -1945,6 +1943,92 @@ AuraTab:AddToggle({
         end
     end
 })
+
+AuraTab:AddToggle({
+    Name = "Tamari Aura [Near Mobs]",
+    Flag = "Tamari",
+    Callback = function(v)
+        getgenv().Tamari = v
+        if v then
+            task.spawn(function()
+                while getgenv().Tamari do 
+                    local bossEntity = getclosest(AllowedBosses, game:GetService("Workspace").Mobs)
+                    
+                    if bossEntity and bossEntity:FindFirstChild("Humanoid") and bossEntity.Humanoid.Health > 0 then
+                        local bossCFrame = bossEntity:GetModelCFrame()
+
+                        local args = {
+                            [1] = "Tamari_Normal_Throw_Damage_new",
+                            [2] = game.Players.LocalPlayer.Character,
+                            [3] = bossCFrame
+                        }          
+                        game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))                
+                    end
+                    task.wait(2)
+                end
+            end)
+            task.spawn(function()
+                while getgenv().Tamari do
+                    local args = {
+                        [1] = "skil_ting_asd",
+                        [2] = game.Players.LocalPlayer,
+                        [3] = "Tamari2_Normal_Throw",
+                        [4] = 5
+                    }
+                    game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))        
+                    task.wait(15)
+                end
+            end)
+        end
+    end
+})
+
+
+AuraTab:AddToggle({
+    Name = "Blood Burst KA [Near Mobs]",
+    Flag = "BloodBurst",
+    Callback = function(v)
+        getgenv().BloodBurst = v
+        if v then
+            task.spawn(function()
+                while getgenv().BloodBurst do 
+                    local target = closestMob()
+                    if target then
+                        local args = {
+                            [1] = "land_mines_place",
+                            [2] = player.Character,
+                            [3] = target:GetModelCFrame()
+                        }    
+                        game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))
+
+                        local folder = workspace.Debree:FindFirstChild(player.Name .. "'s explosive land mines")
+                        if folder then
+                            task.wait(0.2)
+                            for _, mine in ipairs(folder:GetChildren()) do
+                                mine.DetonateEvent:FireServer()
+                            end
+                        end
+                    end
+                    task.wait(1)
+                end
+            end)
+
+            task.spawn(function()
+                while getgenv().BloodBurst do
+                    local args = {
+                        [1] = "skil_ting_asd",
+                        [2] = game.Players.LocalPlayer,
+                        [3] = "blood_burst_explosive_land_mines",
+                        [4] = 5
+                    }    
+                    game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))        
+                    task.wait(30)
+                end
+            end)
+        end
+    end
+})
+
 
 --MoveAround--
 local MoveLoop = nil
