@@ -590,19 +590,18 @@ local mobs = {}
 
 local GodModes = {
 	"scythe_asteroid_reap",
+	"ice_demon_art_bodhisatva",
+	"akaza_bda_compass_needle",
+    "dream_bda_flesh_monster",
+    "swamp_bda_swamp_domain",
+	"blood_burst_explosive_choke_slam",
     "Water_Surface_Slash",
     "insect_breathing_dance_of_the_centipede",
-    "blood_burst_explosive_choke_slam",
-    "explosive_demon_art_blood_burst",
     "Wind_breathing_black_wind_mountain_mist",
     "flame_breathing_flaming_eruption",
     "Beast_breathing_devouring_slash",
-    "akaza_bda_compass_needle",
-    "dream_bda_flesh_monster",
-    "swamp_bda_swamp_domain",
     "snow_breathing_illusory_Storm",
     "sound_breathing_smoke_screen",
-    "ice_demon_art_bodhisatva",
 }
 
 --// Kill Aura \\--
@@ -1977,6 +1976,45 @@ AuraTab:AddToggle({
                     }
                     game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))        
                     task.wait(15)
+                end
+            end)
+        end
+    end
+})
+
+AuraTab:AddToggle({
+    Name = "Dream Aura [Near Mobs]",
+    Flag = "Dream",
+    Callback = function(v)
+        getgenv().Dream = v
+        if v then
+            task.spawn(function()
+                while getgenv().Dream do 
+                    local bossEntity = getclosest(AllowedBosses, game:GetService("Workspace").Mobs)
+                    if bossEntity and bossEntity:FindFirstChild("Humanoid") and bossEntity.Humanoid.Health > 0 then
+                        local bossCFrame = bossEntity:GetModelCFrame()
+
+                        local args = {
+                            [1] = "dream_hypnosis_damage",
+                            [2] = game.Players.LocalPlayer.Character,
+                            [3] = bossCFrame
+                        }          
+                        game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))            
+                    end
+					task.wait(1.5)   
+                end
+            end)
+            
+			task.spawn(function()
+                while getgenv().Dream do
+                    local args = {
+                        [1] = "skil_ting_asd",
+                        [2] = game.Players.LocalPlayer,
+                        [3] = "dream_man_hypnosis",
+                        [4] = 5
+                    }
+                    game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))        
+                    task.wait(20)
                 end
             end)
         end
