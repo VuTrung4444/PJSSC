@@ -2001,7 +2001,7 @@ AuraTab:AddToggle({
                         }          
                         game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))            
                     end
-					task.wait(1.5)   
+					task.wait(1.8)   
                 end
             end)
             
@@ -2014,7 +2014,7 @@ AuraTab:AddToggle({
                         [4] = 5
                     }
                     game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))        
-                    task.wait(20)
+                    task.wait(18)
                 end
             end)
         end
