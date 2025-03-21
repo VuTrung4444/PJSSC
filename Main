@@ -1943,44 +1943,83 @@ AuraTab:AddToggle({
     end
 })
 
+
+function startTamari275()  
+    task.spawn(function()
+        while getgenv().Tamari do
+            if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+                local parentFolder = game:GetService("Workspace").Mobs
+                local v = getclosestSkills(parentFolder) -- Giữ nguyên giống Arrow
+
+                while not v and getgenv().Tamari do
+                    task.wait(0.5)
+                    v = getclosestSkills(parentFolder)
+                end
+
+                local modelCFrame = nil
+                if v and v.GetModelCFrame and type(v.GetModelCFrame) == "function" then
+                    modelCFrame = v:GetModelCFrame()
+                end
+
+                while not modelCFrame and getgenv().Tamari do
+                    task.wait(0.5)
+                    if v and v.GetModelCFrame and type(v.GetModelCFrame) == "function" then
+                        modelCFrame = v:GetModelCFrame()
+                    end
+                    if not v then
+                        break
+                    end
+                end
+
+                -- Kiểm tra khoảng cách trước khi tiếp tục
+                if modelCFrame and (modelCFrame.Position - plr.Character.HumanoidRootPart.Position).Magnitude < 25 then
+                    -- Kiểm tra HP trước khi tấn công
+                    local humanoid = v and v:FindFirstChildOfClass("Humanoid")
+                    if humanoid and humanoid.Health > 0 then
+                        game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(
+                            "Tamari_Normal_Throw_Damage_new",
+                            plr.Character,
+                            modelCFrame,
+                            v,
+                            200,
+                            200
+                        )
+                    end
+                end
+            end
+            task.wait(3)
+        end
+    end)
+end
+
 AuraTab:AddToggle({
     Name = "Tamari Aura [Near Mobs]",
     Flag = "Tamari",
     Callback = function(v)
         getgenv().Tamari = v
         if v then
-            task.spawn(function()
-                while getgenv().Tamari do 
-                    local bossEntity = getclosest(AllowedBosses, game:GetService("Workspace").Mobs)
-                    
-                    if bossEntity and bossEntity:FindFirstChild("Humanoid") and bossEntity.Humanoid.Health > 0 then
-                        local bossCFrame = bossEntity:GetModelCFrame()
-
-                        local args = {
-                            [1] = "Tamari_Normal_Throw_Damage_new",
-                            [2] = game.Players.LocalPlayer.Character,
-                            [3] = bossCFrame
-                        }          
-                        game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))                
-                    end
-                    task.wait(2)
-                end
-            end)
-            task.spawn(function()
-                while getgenv().Tamari do
-                    local args = {
-                        [1] = "skil_ting_asd",
-                        [2] = game.Players.LocalPlayer,
-                        [3] = "Tamari2_Normal_Throw",
-                        [4] = 5
-                    }
-                    game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))        
-                    task.wait(15)
-                end
-            end)
+            startTamari275()
         end
     end
 })
+
+spawn(function()
+    while task.wait() do
+        if getgenv().Tamari then
+            if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+                game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(
+                    "skil_ting_asd",
+                    game.Players.LocalPlayer,
+                    "Tamari2_Normal_Throw",
+                    5
+                )
+                task.wait(8)
+            end
+        end
+    end
+end)
+
+
 
 AuraTab:AddToggle({
     Name = "Dream Aura [Near Mobs]",
