@@ -2106,6 +2106,47 @@ AuraTab:AddToggle({
     end
 })
 
+AuraTab:AddToggle({
+    Name = "Ice Aura [Near Mobs]",
+    Flag = "IceKA",
+    Callback = function(v)
+        getgenv().IceKA = v
+        if v then
+            task.spawn(function()
+                while getgenv().IceKA do
+                    local bossEntity = getclosest(AllowedBosses, game:GetService("Workspace").Mobs)
+
+                    if bossEntity and bossEntity:FindFirstChild("Humanoid") and bossEntity.Humanoid.Health > 0 then
+                        local bossCFrame = bossEntity:GetModelCFrame()
+
+                        -- Sát thương chính
+                            local args = {
+                                [1] = "ice_demon_art_wintry_iciles_damage",
+                                [2] = game.Players.LocalPlayer.Character,
+                                [3] = bossCFrame
+                            }
+                            game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))
+                    end
+                    task.wait(3)
+                end
+            end)
+
+            task.spawn(function()
+                while getgenv().IceKA do
+                    local args = {
+                        [1] = "skil_ting_asd",
+                        [2] = game.Players.LocalPlayer,
+                        [3] = "ice_demon_art_wintry_iciles",
+                        [4] = 5
+                    }
+                    game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))
+                    task.wait(15)
+                end
+            end)
+        end
+    end
+})
+
 
 --MoveAround--
 local MoveLoop = nil
