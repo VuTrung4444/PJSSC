@@ -2147,6 +2147,45 @@ AuraTab:AddToggle({
 })
 
 
+AuraTab:AddToggle({
+    Name = "Shock Aura [Near Mobs]",
+    Flag = "Shock",
+    Callback = function(v)
+        getgenv().Shock = v
+        if v then
+            task.spawn(function()
+                while getgenv().Shock do 
+                    local bossEntity = getclosest(AllowedBosses, game:GetService("Workspace").Mobs)
+                    
+                    if bossEntity and bossEntity:FindFirstChild("Humanoid") and bossEntity.Humanoid.Health > 0 then
+                        local bossCFrame = bossEntity:GetModelCFrame()
+
+                        local args = {
+                            [1] = "Akaza_Air_Type_Damage",
+                            [2] = game.Players.LocalPlayer.Character,
+                            [3] = bossCFrame
+                        }          
+                        game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))                
+                    end
+                    task.wait(2)
+                end
+            end)
+            task.spawn(function()
+                while getgenv().Shock do
+                    local args = {
+                        [1] = "skil_ting_asd",
+                        [2] = game.Players.LocalPlayer,
+                        [3] = "akaza_bda_air_type",
+                        [4] = 5
+                    }
+                    game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))        
+                    task.wait(7.5)
+                end
+            end)
+        end
+    end
+})
+
 --MoveAround--
 local MoveLoop = nil
 local AllBosses = {}  -- Danh sách tất cả boss có thể farm
