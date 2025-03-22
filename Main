@@ -2159,32 +2159,47 @@ AuraTab:AddToggle({
                     
                     if bossEntity and bossEntity:FindFirstChild("Humanoid") and bossEntity.Humanoid.Health > 0 then
                         local bossCFrame = bossEntity:GetModelCFrame()
+                        local distance = (bossCFrame.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
 
-                        local args = {
-                            [1] = "Akaza_Air_Type_Damage",
-                            [2] = game.Players.LocalPlayer.Character,
-                            [3] = bossCFrame
-                        }          
-                        game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))                
+                        if distance < 25 then
+                            local args = {
+                                [1] = "Akaza_Air_Type_Damage",
+                                [2] = game.Players.LocalPlayer.Character,
+                                [3] = bossCFrame
+                            }          
+                            game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))                
+                        end
                     end
-                    task.wait(3)
+                    task.wait(2)
                 end
             end)
+
             task.spawn(function()
                 while getgenv().Shock do
-                    local args = {
-                        [1] = "skil_ting_asd",
-                        [2] = game.Players.LocalPlayer,
-                        [3] = "akaza_bda_air_type",
-                        [4] = 5
-                    }
-                    game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))        
+                    local bossEntity = getclosest(AllowedBosses, game:GetService("Workspace").Mobs)
+                    
+                    if bossEntity then
+                        local bossCFrame = bossEntity:GetModelCFrame()
+                        local distance = (bossCFrame.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+
+                        -- Chỉ dùng skill nếu khoảng cách < 25
+                        if distance < 25 then
+                            local args = {
+                                [1] = "skil_ting_asd",
+                                [2] = game.Players.LocalPlayer,
+                                [3] = "akaza_bda_air_type",
+                                [4] = 5
+                            }
+                            game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))        
+                        end
+                    end
                     task.wait(10)
                 end
             end)
         end
     end
 })
+
 
 --MoveAround--
 local MoveLoop = nil
