@@ -2161,7 +2161,7 @@ AuraTab:AddToggle({
                         local bossCFrame = bossEntity:GetModelCFrame()
                         local distance = (bossCFrame.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
 
-                        if distance < 25 then
+                        if distance < 40 then
                             local args = {
                                 [1] = "Akaza_Air_Type_Damage",
                                 [2] = game.Players.LocalPlayer.Character,
@@ -2170,7 +2170,7 @@ AuraTab:AddToggle({
                             game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))                
                         end
                     end
-                    task.wait(2)
+                    task.wait(3)
                 end
             end)
 
