@@ -1909,32 +1909,61 @@ AuraTab:AddToggle({
     Callback = function(v)
         getgenv().Reaper = v
         if v then
+            -- Luồng tấn công sát thương
             task.spawn(function()
                 while getgenv().Reaper do 
-                    local bossEntity = getclosest(AllowedBosses, game:GetService("Workspace").Mobs)
+                    local target = getclosestSkills(game:GetService("Workspace").Mobs)
                     
-                    if bossEntity and bossEntity:FindFirstChild("Humanoid") and bossEntity.Humanoid.Health > 0 then
-                        local bossCFrame = bossEntity:GetModelCFrame()
+                    if target and target:FindFirstChild("Humanoid") and target.Humanoid.Health > 0 then
+                        local targetCFrame = nil
+                        if target.GetModelCFrame and type(target.GetModelCFrame) == "function" then
+                            targetCFrame = target:GetModelCFrame()
+                        end
 
-                        local args = {
-                            [1] = "reaper-slash_thing_damage",
-                            [2] = game.Players.LocalPlayer.Character,
-                            [3] = bossCFrame
-                        }          
-                        game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))                
+                        if targetCFrame then
+                            local distance = (targetCFrame.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+
+                            -- Chỉ gây sát thương khi gần hơn 25
+                            if distance < 25 then
+                                local args = {
+                                    [1] = "reaper-slash_thing_damage",
+                                    [2] = game.Players.LocalPlayer.Character,
+                                    [3] = targetCFrame
+                                }          
+                                game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))                
+                            end
+                        end
                     end
                     task.wait(1)
                 end
             end)
+
+            -- Luồng kích hoạt skill
             task.spawn(function()
                 while getgenv().Reaper do
-                    local args = {
-                        [1] = "skil_ting_asd",
-                        [2] = game.Players.LocalPlayer,
-                        [3] = "reaperbda_reapofdispair",
-                        [4] = 5
-                    }
-                    game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))        
+                    local target = getclosestSkills(game:GetService("Workspace").Mobs)
+                    
+                    if target then
+                        local targetCFrame = nil
+                        if target.GetModelCFrame and type(target.GetModelCFrame) == "function" then
+                            targetCFrame = target:GetModelCFrame()
+                        end
+
+                        if targetCFrame then
+                            local distance = (targetCFrame.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+
+                            -- Chỉ dùng skill khi khoảng cách < 25
+                            if distance < 25 then
+                                local args = {
+                                    [1] = "skil_ting_asd",
+                                    [2] = game.Players.LocalPlayer,
+                                    [3] = "reaperbda_reapofdispair",
+                                    [4] = 5
+                                }
+                                game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))        
+                            end
+                        end
+                    end
                     task.wait(7.5)
                 end
             end)
@@ -1943,80 +1972,73 @@ AuraTab:AddToggle({
 })
 
 
-function startTamari275()  
-    task.spawn(function()
-        while getgenv().Tamari do
-            if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-                local parentFolder = game:GetService("Workspace").Mobs
-                local v = getclosestSkills(parentFolder) -- Giữ nguyên giống Arrow
-
-                while not v and getgenv().Tamari do
-                    task.wait(0.5)
-                    v = getclosestSkills(parentFolder)
-                end
-
-                local modelCFrame = nil
-                if v and v.GetModelCFrame and type(v.GetModelCFrame) == "function" then
-                    modelCFrame = v:GetModelCFrame()
-                end
-
-                while not modelCFrame and getgenv().Tamari do
-                    task.wait(0.5)
-                    if v and v.GetModelCFrame and type(v.GetModelCFrame) == "function" then
-                        modelCFrame = v:GetModelCFrame()
-                    end
-                    if not v then
-                        break
-                    end
-                end
-
-                -- Kiểm tra khoảng cách trước khi tiếp tục
-                if modelCFrame and (modelCFrame.Position - plr.Character.HumanoidRootPart.Position).Magnitude < 25 then
-                    -- Kiểm tra HP trước khi tấn công
-                    local humanoid = v and v:FindFirstChildOfClass("Humanoid")
-                    if humanoid and humanoid.Health > 0 then
-                        game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(
-                            "Tamari_Normal_Throw_Damage_new",
-                            plr.Character,
-                            modelCFrame,
-                            v,
-                            200,
-                            200
-                        )
-                    end
-                end
-            end
-            task.wait(3)
-        end
-    end)
-end
-
 AuraTab:AddToggle({
     Name = "Tamari Aura [Near Mobs]",
     Flag = "Tamari",
     Callback = function(v)
         getgenv().Tamari = v
         if v then
-            startTamari275()
+            -- Luồng tấn công sát thương
+            task.spawn(function()
+                while getgenv().Tamari do 
+                    local target = getclosestSkills(game:GetService("Workspace").Mobs)
+                    
+                    if target and target:FindFirstChild("Humanoid") and target.Humanoid.Health > 0 then
+                        local targetCFrame = nil
+                        if target.GetModelCFrame and type(target.GetModelCFrame) == "function" then
+                            targetCFrame = target:GetModelCFrame()
+                        end
+
+                        if targetCFrame then
+                            local distance = (targetCFrame.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+
+                            -- Chỉ gây sát thương khi gần hơn 40
+                            if distance < 40 then
+                                local args = {
+                                    [1] = "Tamari_Normal_Throw_Damage_new",
+                                    [2] = game.Players.LocalPlayer.Character,
+                                    [3] = targetCFrame
+                                }          
+                                game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))                
+                            end
+                        end
+                    end
+                    task.wait(2.5)
+                end
+            end)
+
+            -- Luồng kích hoạt skill
+            task.spawn(function()
+                while getgenv().Tamari do
+                    local target = getclosestSkills(game:GetService("Workspace").Mobs)
+                    
+                    if target then
+                        local targetCFrame = nil
+                        if target.GetModelCFrame and type(target.GetModelCFrame) == "function" then
+                            targetCFrame = target:GetModelCFrame()
+                        end
+
+                        if targetCFrame then
+                            local distance = (targetCFrame.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+
+                            -- Chỉ dùng skill khi khoảng cách < 40
+                            if distance < 40 then
+                                local args = {
+                                    [1] = "skil_ting_asd",
+                                    [2] = game.Players.LocalPlayer,
+                                    [3] = "Tamari2_Normal_Throw",
+                                    [4] = 5
+                                }
+                                game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))        
+                            end
+                        end
+                    end
+                    task.wait(18)
+                end
+            end)
         end
     end
 })
-
-spawn(function()
-    while task.wait() do
-        if getgenv().Tamari then
-            if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-                game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(
-                    "skil_ting_asd",
-                    game.Players.LocalPlayer,
-                    "Tamari2_Normal_Throw",
-                    5
-                )
-                task.wait(8)
-            end
-        end
-    end
-end)
 
 
 
@@ -2026,32 +2048,61 @@ AuraTab:AddToggle({
     Callback = function(v)
         getgenv().Dream = v
         if v then
+            -- Luồng tấn công sát thương
             task.spawn(function()
                 while getgenv().Dream do 
-                    local bossEntity = getclosest(AllowedBosses, game:GetService("Workspace").Mobs)
-                    if bossEntity and bossEntity:FindFirstChild("Humanoid") and bossEntity.Humanoid.Health > 0 then
-                        local bossCFrame = bossEntity:GetModelCFrame()
+                    local target = getclosestSkills(game:GetService("Workspace").Mobs)
+                    
+                    if target and target:FindFirstChild("Humanoid") and target.Humanoid.Health > 0 then
+                        local targetCFrame = nil
+                        if target.GetModelCFrame and type(target.GetModelCFrame) == "function" then
+                            targetCFrame = target:GetModelCFrame()
+                        end
 
-                        local args = {
-                            [1] = "dream_hypnosis_damage",
-                            [2] = game.Players.LocalPlayer.Character,
-                            [3] = bossCFrame
-                        }          
-                        game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))            
+                        if targetCFrame then
+                            local distance = (targetCFrame.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+
+                            -- Chỉ gây sát thương khi gần hơn 40
+                            if distance < 40 then
+                                local args = {
+                                    [1] = "dream_hypnosis_damage",
+                                    [2] = game.Players.LocalPlayer.Character,
+                                    [3] = targetCFrame
+                                }          
+                                game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))                
+                            end
+                        end
                     end
-					task.wait(2.5)   
+                    task.wait(2.5)
                 end
             end)
-            
-			task.spawn(function()
+
+            -- Luồng kích hoạt skill
+            task.spawn(function()
                 while getgenv().Dream do
-                    local args = {
-                        [1] = "skil_ting_asd",
-                        [2] = game.Players.LocalPlayer,
-                        [3] = "dream_man_hypnosis",
-                        [4] = 5
-                    }
-                    game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))        
+                    local target = getclosestSkills(game:GetService("Workspace").Mobs)
+                    
+                    if target then
+                        local targetCFrame = nil
+                        if target.GetModelCFrame and type(target.GetModelCFrame) == "function" then
+                            targetCFrame = target:GetModelCFrame()
+                        end
+
+                        if targetCFrame then
+                            local distance = (targetCFrame.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+
+                            -- Chỉ dùng skill khi khoảng cách < 40
+                            if distance < 40 then
+                                local args = {
+                                    [1] = "skil_ting_asd",
+                                    [2] = game.Players.LocalPlayer,
+                                    [3] = "dream_man_hypnosis",
+                                    [4] = 5
+                                }
+                                game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))        
+                            end
+                        end
+                    end
                     task.wait(18)
                 end
             end)
@@ -2111,34 +2162,61 @@ AuraTab:AddToggle({
     Callback = function(v)
         getgenv().IceKA = v
         if v then
+            -- Luồng tấn công sát thương
             task.spawn(function()
-                while getgenv().IceKA do
-                    local bossEntity = getclosest(AllowedBosses, game:GetService("Workspace").Mobs)
+                while getgenv().IceKA do 
+                    local target = getclosestSkills(game:GetService("Workspace").Mobs)
+                    
+                    if target and target:FindFirstChild("Humanoid") and target.Humanoid.Health > 0 then
+                        local targetCFrame = nil
+                        if target.GetModelCFrame and type(target.GetModelCFrame) == "function" then
+                            targetCFrame = target:GetModelCFrame()
+                        end
 
-                    if bossEntity and bossEntity:FindFirstChild("Humanoid") and bossEntity.Humanoid.Health > 0 then
-                        local bossCFrame = bossEntity:GetModelCFrame()
+                        if targetCFrame then
+                            local distance = (targetCFrame.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
 
-                        -- Sát thương chính
-                            local args = {
-                                [1] = "ice_demon_art_wintry_iciles_damage",
-                                [2] = game.Players.LocalPlayer.Character,
-                                [3] = bossCFrame
-                            }
-                            game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))
+                            -- Chỉ gây sát thương khi gần hơn 40
+                            if distance < 40 then
+                                local args = {
+                                    [1] = "ice_demon_art_wintry_iciles_damage",
+                                    [2] = game.Players.LocalPlayer.Character,
+                                    [3] = targetCFrame
+                                }          
+                                game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))                
+                            end
+                        end
                     end
                     task.wait(2)
                 end
             end)
 
+            -- Luồng kích hoạt skill
             task.spawn(function()
                 while getgenv().IceKA do
-                    local args = {
-                        [1] = "skil_ting_asd",
-                        [2] = game.Players.LocalPlayer,
-                        [3] = "ice_demon_art_wintry_iciles",
-                        [4] = 5
-                    }
-                    game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))
+                    local target = getclosestSkills(game:GetService("Workspace").Mobs)
+                    
+                    if target then
+                        local targetCFrame = nil
+                        if target.GetModelCFrame and type(target.GetModelCFrame) == "function" then
+                            targetCFrame = target:GetModelCFrame()
+                        end
+
+                        if targetCFrame then
+                            local distance = (targetCFrame.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+
+                            -- Chỉ dùng skill khi khoảng cách < 40
+                            if distance < 40 then
+                                local args = {
+                                    [1] = "skil_ting_asd",
+                                    [2] = game.Players.LocalPlayer,
+                                    [3] = "ice_demon_art_wintry_iciles",
+                                    [4] = 5
+                                }
+                                game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))        
+                            end
+                        end
+                    end
                     task.wait(15)
                 end
             end)
@@ -2153,44 +2231,59 @@ AuraTab:AddToggle({
     Callback = function(v)
         getgenv().Shock = v
         if v then
+            -- Luồng tấn công sát thương
             task.spawn(function()
                 while getgenv().Shock do 
-                    local bossEntity = getclosest(AllowedBosses, game:GetService("Workspace").Mobs)
+                    local target = getclosestSkills(game:GetService("Workspace").Mobs)
                     
-                    if bossEntity and bossEntity:FindFirstChild("Humanoid") and bossEntity.Humanoid.Health > 0 then
-                        local bossCFrame = bossEntity:GetModelCFrame()
-                        local distance = (bossCFrame.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+                    if target and target:FindFirstChild("Humanoid") and target.Humanoid.Health > 0 then
+                        local targetCFrame = nil
+                        if target.GetModelCFrame and type(target.GetModelCFrame) == "function" then
+                            targetCFrame = target:GetModelCFrame()
+                        end
 
-                        if distance < 40 then
-                            local args = {
-                                [1] = "Akaza_Air_Type_Damage",
-                                [2] = game.Players.LocalPlayer.Character,
-                                [3] = bossCFrame
-                            }          
-                            game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))                
+                        if targetCFrame then
+                            local distance = (targetCFrame.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+
+                            -- Chỉ gây sát thương khi gần hơn 40
+                            if distance < 40 then
+                                local args = {
+                                    [1] = "Akaza_Air_Type_Damage",
+                                    [2] = game.Players.LocalPlayer.Character,
+                                    [3] = targetCFrame
+                                }          
+                                game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))                
+                            end
                         end
                     end
-                    task.wait(3)
+                    task.wait(2)
                 end
             end)
 
+            -- Luồng kích hoạt skill
             task.spawn(function()
                 while getgenv().Shock do
-                    local bossEntity = getclosest(AllowedBosses, game:GetService("Workspace").Mobs)
+                    local target = getclosestSkills(game:GetService("Workspace").Mobs)
                     
-                    if bossEntity then
-                        local bossCFrame = bossEntity:GetModelCFrame()
-                        local distance = (bossCFrame.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+                    if target then
+                        local targetCFrame = nil
+                        if target.GetModelCFrame and type(target.GetModelCFrame) == "function" then
+                            targetCFrame = target:GetModelCFrame()
+                        end
 
-                        -- Chỉ dùng skill nếu khoảng cách < 25
-                        if distance < 25 then
-                            local args = {
-                                [1] = "skil_ting_asd",
-                                [2] = game.Players.LocalPlayer,
-                                [3] = "akaza_bda_air_type",
-                                [4] = 5
-                            }
-                            game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))        
+                        if targetCFrame then
+                            local distance = (targetCFrame.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+
+                            -- Chỉ dùng skill khi khoảng cách < 25
+                            if distance < 40 then
+                                local args = {
+                                    [1] = "skil_ting_asd",
+                                    [2] = game.Players.LocalPlayer,
+                                    [3] = "akaza_bda_air_type",
+                                    [4] = 5
+                                }
+                                game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))        
+                            end
                         end
                     end
                     task.wait(10)
@@ -2199,6 +2292,7 @@ AuraTab:AddToggle({
         end
     end
 })
+
 
 
 --MoveAround--
