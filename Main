@@ -1889,7 +1889,8 @@ AuraTab:AddToggle({
             end)
             task.spawn(function()
                 while getgenv().Swamp do
-                    local args = {
+					if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+                   	 local args = {
                         [1] = "skil_ting_asd",
                         [2] = game.Players.LocalPlayer,
                         [3] = "swampbda_swamp_puddle",
@@ -1897,6 +1898,7 @@ AuraTab:AddToggle({
                     }
                     game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))        
                     task.wait(9.5)
+					end
                 end
             end)
         end
@@ -1941,19 +1943,7 @@ AuraTab:AddToggle({
             -- Luồng kích hoạt skill
             task.spawn(function()
                 while getgenv().Reaper do
-                    local target = getclosestSkills(game:GetService("Workspace").Mobs)
-                    
-                    if target then
-                        local targetCFrame = nil
-                        if target.GetModelCFrame and type(target.GetModelCFrame) == "function" then
-                            targetCFrame = target:GetModelCFrame()
-                        end
-
-                        if targetCFrame then
-                            local distance = (targetCFrame.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
-
-                            -- Chỉ dùng skill khi khoảng cách < 25
-                            if distance < 25 then
+				 	if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
                                 local args = {
                                     [1] = "skil_ting_asd",
                                     [2] = game.Players.LocalPlayer,
@@ -1961,10 +1951,8 @@ AuraTab:AddToggle({
                                     [4] = 5
                                 }
                                 game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))        
-                            end
-                        end
-                    end
-                    task.wait(9)
+                   				task.wait(9)
+					 end
                 end
             end)
         end
@@ -2010,19 +1998,7 @@ AuraTab:AddToggle({
             -- Luồng kích hoạt skill
             task.spawn(function()
                 while getgenv().Tamari do
-                    local target = getclosestSkills(game:GetService("Workspace").Mobs)
-                    
-                    if target then
-                        local targetCFrame = nil
-                        if target.GetModelCFrame and type(target.GetModelCFrame) == "function" then
-                            targetCFrame = target:GetModelCFrame()
-                        end
-
-                        if targetCFrame then
-                            local distance = (targetCFrame.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
-
-                            -- Chỉ dùng skill khi khoảng cách < 40
-                            if distance < 40 then
+					 if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
                                 local args = {
                                     [1] = "skil_ting_asd",
                                     [2] = game.Players.LocalPlayer,
@@ -2030,10 +2006,8 @@ AuraTab:AddToggle({
                                     [4] = 5
                                 }
                                 game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))        
-                            end
-                        end
-                    end
-                    task.wait(18)
+								task.wait(18)
+					end
                 end
             end)
         end
@@ -2080,19 +2054,7 @@ AuraTab:AddToggle({
             -- Luồng kích hoạt skill
             task.spawn(function()
                 while getgenv().Dream do
-                    local target = getclosestSkills(game:GetService("Workspace").Mobs)
-                    
-                    if target then
-                        local targetCFrame = nil
-                        if target.GetModelCFrame and type(target.GetModelCFrame) == "function" then
-                            targetCFrame = target:GetModelCFrame()
-                        end
-
-                        if targetCFrame then
-                            local distance = (targetCFrame.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
-
-                            -- Chỉ dùng skill khi khoảng cách < 40
-                            if distance < 40 then
+					if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
                                 local args = {
                                     [1] = "skil_ting_asd",
                                     [2] = game.Players.LocalPlayer,
@@ -2100,10 +2062,8 @@ AuraTab:AddToggle({
                                     [4] = 5
                                 }
                                 game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))        
-                            end
-                        end
-                    end
-                    task.wait(18)
+                   				task.wait(18)
+					end
                 end
             end)
         end
@@ -2117,44 +2077,65 @@ AuraTab:AddToggle({
     Callback = function(v)
         getgenv().BloodBurst = v
         if v then
+            -- Luồng đặt mìn và kích nổ
             task.spawn(function()
                 while getgenv().BloodBurst do 
-                    local target = closestMob()
-                    if target then
-                        local args = {
-                            [1] = "land_mines_place",
-                            [2] = player.Character,
-                            [3] = target:GetModelCFrame()
-                        }    
-                        game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))
+                    local target = getclosestSkills(game:GetService("Workspace").Mobs)
+                    
+                    if target and target:FindFirstChild("Humanoid") and target.Humanoid.Health > 0 then
+                        local targetCFrame = nil
+                        if target.GetModelCFrame and type(target.GetModelCFrame) == "function" then
+                            targetCFrame = target:GetModelCFrame()
+                        end
 
-                        local folder = workspace.Debree:FindFirstChild(player.Name .. "'s explosive land mines")
-                        if folder then
-                            task.wait(0.2)
-                            for _, mine in ipairs(folder:GetChildren()) do
-                                mine.DetonateEvent:FireServer()
+                        if targetCFrame then
+                            local distance = (targetCFrame.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+                            
+                            -- Chỉ đặt mìn khi gần hơn 40
+                            if distance < 40 then
+                                local args = {
+                                    [1] = "land_mines_place",
+                                    [2] = game.Players.LocalPlayer.Character,
+                                    [3] = targetCFrame
+                                }    
+                                game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))
+
+                                -- Kích hoạt mìn sau 0.2s nếu tìm thấy
+                                local folder = workspace.Debree:FindFirstChild(game.Players.LocalPlayer.Name .. "'s explosive land mines")
+                                if folder then
+                                    task.wait(0.2)
+                                    for _, mine in ipairs(folder:GetChildren()) do
+                                        if mine:FindFirstChild("DetonateEvent") then
+                                            mine.DetonateEvent:FireServer()
+                                        end
+                                    end
+                                end
                             end
                         end
                     end
-                    task.wait(1)
+                    task.wait(2.5) -- Cùng nhịp với Tamari Aura
                 end
             end)
 
+            -- Luồng kích hoạt skill chính
             task.spawn(function()
                 while getgenv().BloodBurst do
-                    local args = {
-                        [1] = "skil_ting_asd",
-                        [2] = game.Players.LocalPlayer,
-                        [3] = "blood_burst_explosive_land_mines",
-                        [4] = 5
-                    }    
-                    game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))        
+                    if game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                        local args = {
+                            [1] = "skil_ting_asd",
+                            [2] = game.Players.LocalPlayer,
+                            [3] = "blood_burst_explosive_land_mines",
+                            [4] = 5
+                        }    
+                        game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))        
+                    end
                     task.wait(30)
                 end
             end)
         end
     end
 })
+
 
 AuraTab:AddToggle({
     Name = "Ice Aura [Near Mobs]",
@@ -2194,19 +2175,7 @@ AuraTab:AddToggle({
             -- Luồng kích hoạt skill
             task.spawn(function()
                 while getgenv().IceKA do
-                    local target = getclosestSkills(game:GetService("Workspace").Mobs)
-                    
-                    if target then
-                        local targetCFrame = nil
-                        if target.GetModelCFrame and type(target.GetModelCFrame) == "function" then
-                            targetCFrame = target:GetModelCFrame()
-                        end
-
-                        if targetCFrame then
-                            local distance = (targetCFrame.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
-
-                            -- Chỉ dùng skill khi khoảng cách < 40
-                            if distance < 40 then
+					if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
                                 local args = {
                                     [1] = "skil_ting_asd",
                                     [2] = game.Players.LocalPlayer,
@@ -2214,10 +2183,8 @@ AuraTab:AddToggle({
                                     [4] = 5
                                 }
                                 game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))        
-                            end
-                        end
-                    end
-                    task.wait(15)
+								task.wait(15)
+					end
                 end
             end)
         end
@@ -2263,30 +2230,16 @@ AuraTab:AddToggle({
             -- Luồng kích hoạt skill
             task.spawn(function()
                 while getgenv().Shock do
-                    local target = getclosestSkills(game:GetService("Workspace").Mobs)
-                    
-                    if target then
-                        local targetCFrame = nil
-                        if target.GetModelCFrame and type(target.GetModelCFrame) == "function" then
-                            targetCFrame = target:GetModelCFrame()
-                        end
-
-                        if targetCFrame then
-                            local distance = (targetCFrame.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
-
-                            -- Chỉ dùng skill khi khoảng cách < 25
-                            if distance < 40 then
+					if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
                                 local args = {
                                     [1] = "skil_ting_asd",
                                     [2] = game.Players.LocalPlayer,
                                     [3] = "akaza_bda_air_type",
                                     [4] = 5
                                 }
-                                game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))        
-                            end
-                        end
-                    end
-                    task.wait(10)
+                                game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))
+								task.wait(10)
+					end
                 end
             end)
         end
