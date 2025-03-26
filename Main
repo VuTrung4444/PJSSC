@@ -2072,14 +2072,14 @@ AuraTab:AddToggle({
 
 
 AuraTab:AddToggle({
-    Name = "Blood Burst KA [Near Mobs]",
-    Flag = "BloodBurst",
+    Name = "Blood Aura [Near Mobs]",
+    Flag = "Blood",
     Callback = function(v)
-        getgenv().BloodBurst = v
+        getgenv().Blood = v
         if v then
-            -- Luồng đặt mìn và kích nổ
+            -- Luồng tấn công sát thương
             task.spawn(function()
-                while getgenv().BloodBurst do 
+                while getgenv().Blood do 
                     local target = getclosestSkills(game:GetService("Workspace").Mobs)
                     
                     if target and target:FindFirstChild("Humanoid") and target.Humanoid.Health > 0 then
@@ -2090,46 +2090,35 @@ AuraTab:AddToggle({
 
                         if targetCFrame then
                             local distance = (targetCFrame.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
-                            
-                            -- Chỉ đặt mìn khi gần hơn 40
+
+                            -- Chỉ gây sát thương khi gần hơn 25
                             if distance < 40 then
                                 local args = {
-                                    [1] = "land_mines_place",
+                                    [1] = "blood_burst_blood_shot_damage",
                                     [2] = game.Players.LocalPlayer.Character,
                                     [3] = targetCFrame
-                                }    
-                                game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))
-
-                                -- Kích hoạt mìn sau 0.2s nếu tìm thấy
-                                local folder = workspace.Debree:FindFirstChild(game.Players.LocalPlayer.Name .. "'s explosive land mines")
-                                if folder then
-                                    task.wait(0.2)
-                                    for _, mine in ipairs(folder:GetChildren()) do
-                                        if mine:FindFirstChild("DetonateEvent") then
-                                            mine.DetonateEvent:FireServer()
-                                        end
-                                    end
-                                end
+                                }          
+                                game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))                
                             end
                         end
                     end
-                    task.wait(2.5) -- Cùng nhịp với Tamari Aura
+                    task.wait(2.5)
                 end
             end)
 
-            -- Luồng kích hoạt skill chính
+            -- Luồng kích hoạt skill
             task.spawn(function()
-                while getgenv().BloodBurst do
-                    if game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                        local args = {
-                            [1] = "skil_ting_asd",
-                            [2] = game.Players.LocalPlayer,
-                            [3] = "blood_burst_explosive_land_mines",
-                            [4] = 5
-                        }    
-                        game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))        
-                    end
-                    task.wait(30)
+                while getgenv().Blood do
+				 	if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+                                local args = {
+                                    [1] = "skil_ting_asd",
+                                    [2] = game.Players.LocalPlayer,
+                                    [3] = "blood_burst_blood_shot",
+                                    [4] = 5
+                                }
+                                game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))        
+                   				task.wait(9)
+					 end
                 end
             end)
         end
@@ -2627,7 +2616,8 @@ MiscSection:AddToggle({
 })
 
 --FindMuzan--
-local teleportToMuzanEnabled = false
+local TweenService = game:GetService("TweenService")
+local TweenSpeed = 50 -- Điều chỉnh tốc độ teleport
 
 local function teleportToMuzan()
     task.spawn(function()
@@ -2645,14 +2635,17 @@ local function teleportToMuzan()
         end
 
         local muzanPos = getMuzanSpawnPos()
-
         if muzanPos then
             local offset = Vector3.new(10, 5, 0)
             local targetPos = muzanPos + offset
 
-            hrp.CFrame = CFrame.new(targetPos)
-
-            teleportToMuzanEnabled = false 
+            -- Tính khoảng cách và dùng TweenService để teleport mượt
+            local Magnitude = (hrp.Position - targetPos).Magnitude
+            if Magnitude then
+                local Cur = TweenService:Create(hrp, TweenInfo.new(Magnitude / TweenSpeed, Enum.EasingStyle.Linear), {CFrame = CFrame.new(targetPos)})
+                Cur:Play()
+                Cur.Completed:Wait() -- Đợi teleport hoàn tất trước khi tiếp tục
+            end
         end
     end)
 end
@@ -2661,7 +2654,6 @@ MiscSection:AddToggle({
     Name = "Auto Teleport to Muzan",
     Flag = "AutoTPMuzan",
     Callback = function(state)
-        teleportToMuzanEnabled = state
         if state then
             teleportToMuzan()
         end
