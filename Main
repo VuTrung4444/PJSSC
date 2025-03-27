@@ -1418,7 +1418,7 @@ spawn(function()
             }
             
             game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("To_Server"):WaitForChild("Handle_Initiate_S"):FireServer(unpack(args))
-            task.wait(0.30)
+            task.wait(0.5)
         end
     end
 end)
