@@ -1986,10 +1986,11 @@ AuraTab:AddToggle({
                                     game.Players.LocalPlayer.Character,
                                     targetCFrame
                                 )
+                                task.wait(2.5) -- Giữ nguyên task.wait
                             end
                         end
                     end
-                    task.wait(3) -- Chờ ngắn để kiểm tra mục tiêu mới nhanh hơn
+                    task.wait(0.5) -- Chờ ngắn để kiểm tra mục tiêu mới nhanh hơn
                 end
             end)
 
