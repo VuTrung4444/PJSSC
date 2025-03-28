@@ -1970,9 +1970,12 @@ AuraTab:AddToggle({
             task.spawn(function()
                 while getgenv().Tamari do 
                     local target = getclosestSkills(game:GetService("Workspace").Mobs)
-                    
-                    if target and target:FindFirstChild("Humanoid") and target.Humanoid.Health > 0 then
+
+                    -- Kiểm tra target tồn tại và có Humanoid hợp lệ
+                    if target and target.Parent and target:FindFirstChild("Humanoid") and target.Humanoid.Health > 0 then
                         local targetCFrame = nil
+                        
+                        -- Kiểm tra hàm GetModelCFrame hợp lệ trước khi gọi
                         if target.GetModelCFrame and type(target.GetModelCFrame) == "function" then
                             targetCFrame = target:GetModelCFrame()
                         end
@@ -1980,7 +1983,7 @@ AuraTab:AddToggle({
                         if targetCFrame then
                             local distance = (targetCFrame.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
 
-                            -- Gây sát thương ngay khi tìm thấy mục tiêu trong phạm vi
+                            -- Gây sát thương ngay lập tức nếu mục tiêu trong phạm vi
                             if distance < 40 then
                                 game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(
                                     "Tamari_Normal_Throw_Damage_new",
@@ -1988,21 +1991,14 @@ AuraTab:AddToggle({
                                     targetCFrame
                                 )
 
-                                -- Nếu mục tiêu vẫn còn sống, đợi 3 giây mới tiếp tục
-                                local waitTime = 3
-                                while waitTime > 0 do
-                                    task.wait(0.5)  -- Kiểm tra mỗi 0.5 giây
-                                    waitTime = waitTime - 0.5
-                                    
-                                    -- Nếu máu mục tiêu tụt xuống 0 thì dừng chờ ngay
-                                    if target.Humanoid.Health <= 0 then
-                                        break
-                                    end
+                                -- Kiểm tra lại nếu target còn sống sau đòn tấn công
+                                if target.Parent and target:FindFirstChild("Humanoid") and target.Humanoid.Health > 0 then
+                                    task.wait(3)
                                 end
                             end
                         end
                     end
-                    task.wait(0.1) -- Kiểm tra mục tiêu nhanh hơn mà không gây lag
+                    task.wait(0.1) -- Kiểm tra mục tiêu mới nhanh hơn
                 end
             end)
 
@@ -2017,12 +2013,13 @@ AuraTab:AddToggle({
                             5
                         )        
                     end
-                    task.wait(10) -- Đặt task.wait(15) sau khi kích hoạt skill để tránh spam
+                    task.wait(10) -- Đặt task.wait(10) sau khi kích hoạt skill để tránh spam
                 end
             end)
         end
     end
 })
+
 
 AuraTab:AddToggle({
     Name = "Dream Aura [Near Mobs]",
