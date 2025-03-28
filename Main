@@ -1959,6 +1959,7 @@ AuraTab:AddToggle({
     end
 })
 
+
 AuraTab:AddToggle({
     Name = "Tamari Aura [Near Mobs]",
     Flag = "Tamari",
@@ -1986,11 +1987,22 @@ AuraTab:AddToggle({
                                     game.Players.LocalPlayer.Character,
                                     targetCFrame
                                 )
-                                task.wait(2.5) -- Giữ nguyên task.wait
+
+                                -- Nếu mục tiêu vẫn còn sống, đợi 3 giây mới tiếp tục
+                                local waitTime = 3
+                                while waitTime > 0 do
+                                    task.wait(0.5)  -- Kiểm tra mỗi 0.5 giây
+                                    waitTime = waitTime - 0.5
+                                    
+                                    -- Nếu máu mục tiêu tụt xuống 0 thì dừng chờ ngay
+                                    if target.Humanoid.Health <= 0 then
+                                        break
+                                    end
+                                end
                             end
                         end
                     end
-                    task.wait(0.5) -- Chờ ngắn để kiểm tra mục tiêu mới nhanh hơn
+                    task.wait(0.1) -- Kiểm tra mục tiêu nhanh hơn mà không gây lag
                 end
             end)
 
@@ -2005,13 +2017,12 @@ AuraTab:AddToggle({
                             5
                         )        
                     end
-                    task.wait(10) -- Đặt task.wait(10) sau khi kích hoạt skill để tránh spam
+                    task.wait(10) -- Đặt task.wait(15) sau khi kích hoạt skill để tránh spam
                 end
             end)
         end
     end
 })
-
 
 AuraTab:AddToggle({
     Name = "Dream Aura [Near Mobs]",
