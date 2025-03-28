@@ -1959,7 +1959,6 @@ AuraTab:AddToggle({
     end
 })
 
-
 AuraTab:AddToggle({
     Name = "Tamari Aura [Near Mobs]",
     Flag = "Tamari",
@@ -1980,40 +1979,38 @@ AuraTab:AddToggle({
                         if targetCFrame then
                             local distance = (targetCFrame.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
 
-                            -- Chỉ gây sát thương khi gần hơn 40
+                            -- Gây sát thương ngay khi tìm thấy mục tiêu trong phạm vi
                             if distance < 40 then
-                                local args = {
-                                    [1] = "Tamari_Normal_Throw_Damage_new",
-                                    [2] = game.Players.LocalPlayer.Character,
-                                    [3] = targetCFrame
-                                }          
-                                game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))                
+                                game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(
+                                    "Tamari_Normal_Throw_Damage_new",
+                                    game.Players.LocalPlayer.Character,
+                                    targetCFrame
+                                )
+                                task.wait(2.5) -- Giữ nguyên task.wait(2.5) ở đây để tránh spam lệnh tấn công
                             end
                         end
                     end
-                    task.wait(3)
+                    task.wait(0.5) -- Chờ ngắn để kiểm tra mục tiêu mới nhanh hơn
                 end
             end)
 
             -- Luồng kích hoạt skill
             task.spawn(function()
                 while getgenv().Tamari do
-					 if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-                                local args = {
-                                    [1] = "skil_ting_asd",
-                                    [2] = game.Players.LocalPlayer,
-                                    [3] = "Tamari2_Normal_Throw",
-                                    [4] = 5
-                                }
-                                game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))        
-								task.wait(10)
-					end
+                    if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+                        game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(
+                            "skil_ting_asd",
+                            game.Players.LocalPlayer,
+                            "Tamari2_Normal_Throw",
+                            5
+                        )        
+                    end
+                    task.wait(10) -- Đặt task.wait(10) sau khi kích hoạt skill để tránh spam
                 end
             end)
         end
     end
 })
-
 
 
 AuraTab:AddToggle({
