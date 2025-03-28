@@ -1989,7 +1989,7 @@ AuraTab:AddToggle({
                             end
                         end
                     end
-                    task.wait(1) -- Chờ ngắn để kiểm tra mục tiêu mới nhanh hơn
+                    task.wait(3) -- Chờ ngắn để kiểm tra mục tiêu mới nhanh hơn
                 end
             end)
 
