@@ -2622,7 +2622,7 @@ MiscSection:AddToggle({
 
 --FindMuzan--
 local TweenService = game:GetService("TweenService")
-local TweenSpeed = 50 -- Điều chỉnh tốc độ teleport
+local TweenSpeed = 250 -- Điều chỉnh tốc độ teleport
 
 local function teleportToMuzan()
     task.spawn(function()
