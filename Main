@@ -2471,7 +2471,7 @@ local function safeMoveToFlower(flower)
 
     local attempts = 0
     while attempts < 3 do
-        local tween, duration = TweenToPosition(position, 250)
+        local tween, duration = TweenToPosition(position, 200)
         if not tween then return false end
 
         local start = tick()
