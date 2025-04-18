@@ -482,6 +482,9 @@ local AllowedBosses = {
     "Yahaba",
 	"Bandit Kaden",
 	"Nomay Bandit Boss",
+	"Wop1",
+	"Wop2",
+	
 }
 
 local BossLocationsMap1 = {
@@ -501,6 +504,7 @@ local BossLocationsMap2 = {
     { Name = "Akeza", Position = Vector3.new(2006.46, 566, -130.2) },
     { Name = "Inosuke", Position = Vector3.new(1592.34, 299.98, -388.1) },
     { Name = "Enme", Position = Vector3.new(1591.18, 495.61, -685.5775) },
+	{ Name = "Wop1", Position = Vector3.new(-278.02, 601.28, -602.12) },
     { Name = "Renpeke", Position = Vector3.new(-1265, 600.57, -659.554) },
     { Name = "Swampy", Position = Vector3.new(-1364.28, 600.96875, -223.2) },
     { Name = "Sound Trainee", Position = Vector3.new(1881.34, 675.42, -2800.46) },
@@ -510,7 +514,9 @@ local BossLocationsMap2 = {
     { Name = "Muichiro Tokito", Position = Vector3.new(4513.83, 672.41, -559.748) },
     { Name = "Rengoku", Position = Vector3.new(3654.3999, 672.91, -348.877) },
     { Name = "Slasher", Position = Vector3.new(908.402, 487.295, -1351.5653) },
-	{ Name = "Nomay Bandit Boss", Position = Vector3.new(3467.59399, 673.1099, -1882.6058) }
+	{ Name = "Nomay Bandit Boss", Position = Vector3.new(3467.59399, 673.1099, -1882.6058) },
+	{ Name = "Wop2", Position = Vector3.new(3541.91, 673.11, -2145.45) }
+
 }
 
 local Map1 = {
@@ -1219,43 +1225,70 @@ Ect:AddToggle({
 })
 
 local Formatted = ("%svs"):format(Player.Name)
-Ect:AddToggle({
-    Name = "Auto Clash",
-    Value = false, 
-    Flag = "AutoClash",
-    Callback = function(State)
-        LRIEPMFLA = State 
-        while LRIEPMFLA and IsOpen() do -- what the fuck is this
+local autoClashRunning = false
+local autoClashThread = nil
+
+-- Hàm chính Auto Clash
+function StartAutoClash()
+    if autoClashRunning then return end -- tránh chạy nhiều vòng
+    autoClashRunning = true
+    autoClashThread = task.spawn(function()
+        while autoClashRunning and IsOpen() do
             local ClashFolder = Debree:FindFirstChild("clash_folder") 
             if ClashFolder then 
-                for i,v in next, ClashFolder:GetChildren() do 
+                for _, v in next, ClashFolder:GetChildren() do 
                     if v.Name:find(Formatted) then 
                         local Points = v:FindFirstChild(Player.Name) 
-                        if not Points then continue end 
-                        spawn(function()
-                            task.wait(7.5) 
-                            game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer("Change_Value", Points, 99999999999)
-                        end)
+                        if Points then 
+                            task.spawn(function()
+                                task.wait(7.5)
+                                game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer("Change_Value", Points, 99999999999)
+                            end)
+                        end
                     else 
-                        for i1,Points in next, v:GetChildren() do 
+                        for _, Points in next, v:GetChildren() do 
                             if Players:FindFirstChild(Points.Name) then 
-                                spawn(function()
-                                    task.wait(7.5) 
+                                task.spawn(function()
+                                    task.wait(7.5)
                                     game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer("Change_Value", Points, 99999999999)
                                 end)
                             end 
                         end 
                     end 
                 end 
-            end 
+            end
+
+            -- Clash đang diễn ra
             local Found = Clashing:FindFirstChild(Player.Name)
             local Points = Found and Found:FindFirstChild("Points") 
             if Points then
                 game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer("Change_Value", Points, 99999999999)  
-            end 
-        end 
-    end 
+            end
+
+            task.wait(1) -- Giảm spam
+        end
+    end)
+end
+
+-- Hàm dừng Auto Clash
+function StopAutoClash()
+    autoClashRunning = false
+end
+
+-- GUI Toggle để bật/tắt Auto Clash
+Ect:AddToggle({
+    Name = "Auto Clash",
+    Value = false, 
+    Flag = "AutoClash",
+    Callback = function(State)
+        if State then
+            StartAutoClash()
+        else
+            StopAutoClash()
+        end
+    end
 })
+
 
 Ect:AddButton({
     Name = "Reset",
