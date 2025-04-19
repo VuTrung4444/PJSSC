@@ -1306,13 +1306,10 @@ Ect:AddToggle({
                         if enmu == 1 then
                             enmu = 0
                             print(">> Enmu biến mất.")
+                            print(">> Mất Enmu nhưng chưa có Flesh Monster => tắt startArrow275Loop")
+							getgenv().Arrow = false
+                            pcall(stopArrow275Loop)
                         end
-                    end
-
-                    -- Nếu có Enmu và chưa có Flesh, tắt startArrow275Loop
-                    if hasEnmu and not hasFlesh then
-                        print(">> Có Enmu nhưng chưa có Flesh Monster => tắt startArrow275Loop")
-                        pcall(stopArrow275Loop)
                     end
 
                     -- Phát hiện Flesh Monster
@@ -1321,23 +1318,21 @@ Ect:AddToggle({
                             flesh = 1
                             print(">> Flesh Monster xuất hiện => chờ 5s rồi bật startArrow275Loop")
                             task.delay(5, function()
-                                pcall(startArrow275Loop)
+							getgenv().Arrow = true
+                            pcall(startArrow275Loop)
                             end)
                         end
                     else
                         if flesh == 1 then
                             flesh = 0
                             print(">> Flesh Monster biến mất => bật AutoClash")
-
-                            -- Bật AutoClash khi Flesh biến mất
-                            if Ect and Ect.Flags and Ect.Flags["AutoClash"] then
-                                Ect.Flags["AutoClash"].Callback(true)
-                            end
+                            StartAutoClash()
                         end
                     end
 
                     -- Phát hiện Akaza và thực hiện tween
                     if hasAkaza then
+                        StopAutoClash()
                         print(">> Akaza phát hiện => Nhảy lùi 200 đơn vị và bay lên")
                         local player = game.Players.LocalPlayer
                         local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
@@ -1351,11 +1346,12 @@ Ect:AddToggle({
                     end
                 end
 
-                task.wait(1) -- Đợi 1 giây trước vòng lặp tiếp theo
+                task.wait(1)
             end
         end)
     end
 })
+
 
 
 Ect:AddButton({
