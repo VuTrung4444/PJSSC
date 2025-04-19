@@ -1329,7 +1329,7 @@ Ect:AddToggle({
                         end
                     end
 
-					if hasAkaza then
+					if hasAkaza and autoClashRunning then
     StopAutoClash()
     print(">> tắt AutoClash")
 
