@@ -1330,34 +1330,21 @@ Ect:AddToggle({
                     end
 
 					if hasAkaza then
-						StopAutoClash()
-						print(">> tắt AutoClash")
+    StopAutoClash()
+    print(">> tắt AutoClash")
 
-						local player = game.Players.LocalPlayer
-						local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+    local player = game.Players.LocalPlayer
+    local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
 
-						if hrp and fly == 0 and not hasFlesh then
-							fly = 1
+    if hrp and fly == 0 and not hasFlesh then
+        fly = 1
 
-							-- Vị trí an toàn cố định
-							local targetPosition = Vector3.new(-1328.95, 739.72, -888.61)
+        local targetPosition = Vector3.new(-1328.95, 739.72, -888.61)
+        Tween(CFrame.new(targetPosition))
 
-							-- Tính khoảng cách
-							local function GetDistance(Endpoint)
-								return (Endpoint - hrp.Position).Magnitude
-							end
-
-							-- Tính thời gian tween dựa theo khoảng cách
-							local distance = GetDistance(targetPosition)
-							local tweenInfo = TweenInfo.new(distance / 100, Enum.EasingStyle.Linear)
-
-							-- Tạo tween đến vị trí an toàn
-							local targetCFrame = CFrame.new(targetPosition)
-							local tween = TweenService:Create(hrp, tweenInfo, { CFrame = targetCFrame })
-							tween:Play()
-print(">> Akaza phát hiện => Di chuyển đến vị trí an toàn")
-						end
-					end
+        print(">> Akaza phát hiện => Di chuyển đến vị trí an toàn")
+    end
+end
                 end
 
                 task.wait(1)
