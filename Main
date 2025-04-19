@@ -1306,9 +1306,9 @@ Ect:AddToggle({
                         if enmu == 1 then
                             enmu = 0
                             print(">> Enmu biến mất.")
-                            print(">> Mất Enmu nhưng chưa có Flesh Monster => tắt startArrow275Loop")
-							getgenv().Arrow = false
+                            getgenv().Arrow = false
                             pcall(stopArrow275Loop)
+                            print(">> Mất Enmu nhưng chưa có Flesh Monster => tắt startArrow275Loop")
                         end
                     end
 
@@ -1317,31 +1317,44 @@ Ect:AddToggle({
                         if flesh == 0 then
                             flesh = 1
                             print(">> Flesh Monster xuất hiện => chờ 5s rồi bật startArrow275Loop")
-                            task.delay(5, function()
-							getgenv().Arrow = true
-                            pcall(startArrow275Loop)
-                            end)
-                        end
-                    else
-                        if flesh == 1 then
-                            flesh = 0
-                            print(">> Flesh Monster biến mất => bật AutoClash")
-                            StartAutoClash()
+                            if not getgenv().Arrow then
+                                task.delay(5, function()
+                                    getgenv().Arrow = true
+                                    pcall(startArrow275Loop)
+                                    StartAutoClash()
+                                    print(">> bật AutoClash")
+                                end)
+                            end
                         end
                     end
 
                     -- Phát hiện Akaza và thực hiện tween
                     if hasAkaza then
                         StopAutoClash()
-                        print(">> Akaza phát hiện => Nhảy lùi 200 đơn vị và bay lên")
+                        print(">> tắt AutoClash")
+                        print(">> Akaza phát hiện => Nhảy lùi 200 đơn vị")
+
                         local player = game.Players.LocalPlayer
                         local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+
                         if hrp then
-                            local TweenService = game:GetService("TweenService")
-                            local goalPos = hrp.Position + Vector3.new(0, 25, -200)
-                            local info = TweenInfo.new(1.5, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
-                            local tween = TweenService:Create(hrp, info, {Position = goalPos})
-                            tween:Play()
+                            -- Lùi 200 đơn vị
+                            local targetPosition = hrp.Position - hrp.CFrame.LookVector * 200
+
+                            -- Tính toán khoảng cách từ vị trí hiện tại đến vị trí mục tiêu
+                            local function GetDistance(Endpoint)
+                                local Magnitude = (Endpoint - hrp.Position).Magnitude
+                                return Magnitude
+                            end
+
+                            -- Cấu hình tween
+                            local Distance = GetDistance(targetPosition)
+                            local TweenInfo = TweenInfo.new(Distance / 100, Enum.EasingStyle.Linear)  -- Điều chỉnh tốc độ
+
+                            -- Tạo tween để di chuyển đến vị trí lùi lại
+                            local targetCFrame = CFrame.new(targetPosition)
+                            local TweenObj = TweenService:Create(hrp, TweenInfo, { CFrame = targetCFrame })
+                            TweenObj:Play()
                         end
                     end
                 end
@@ -1351,6 +1364,7 @@ Ect:AddToggle({
         end)
     end
 })
+
 
 
 
