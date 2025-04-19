@@ -1329,36 +1329,35 @@ Ect:AddToggle({
                         end
                     end
 
-                    -- Phát hiện Akaza và thực hiện tween
-                    if hasAkaza then
-                        StopAutoClash()
-                        print(">> tắt AutoClash")
-                        print(">> Akaza phát hiện => Nhảy lùi 200 đơn vị")
+					if hasAkaza then
+						StopAutoClash()
+						print(">> tắt AutoClash")
+						print(">> Akaza phát hiện => Di chuyển đến vị trí an toàn")
 
-                        local player = game.Players.LocalPlayer
-                        local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+						local player = game.Players.LocalPlayer
+						local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
 
-                        if hrp and fly == 0 then
+						if hrp and fly == 0 then
 							fly = 1
-                            -- Lùi 200 đơn vị
-                            local targetPosition = hrp.Position - hrp.CFrame.LookVector * 200
 
-                            -- Tính toán khoảng cách từ vị trí hiện tại đến vị trí mục tiêu
-                            local function GetDistance(Endpoint)
-                                local Magnitude = (Endpoint - hrp.Position).Magnitude
-                                return Magnitude
-                            end
+							-- Vị trí an toàn cố định
+							local targetPosition = Vector3.new(-1328.95, 739.72, -888.61)
 
-                            -- Cấu hình tween
-                            local Distance = GetDistance(targetPosition)
-                            local TweenInfo = TweenInfo.new(Distance / 100, Enum.EasingStyle.Linear)  -- Điều chỉnh tốc độ
+							-- Tính khoảng cách
+							local function GetDistance(Endpoint)
+								return (Endpoint - hrp.Position).Magnitude
+							end
 
-                            -- Tạo tween để di chuyển đến vị trí lùi lại
-                            local targetCFrame = CFrame.new(targetPosition)
-                            local TweenObj = TweenService:Create(hrp, TweenInfo, { CFrame = targetCFrame })
-                            TweenObj:Play()
-                        end
-                    end
+							-- Tính thời gian tween dựa theo khoảng cách
+							local distance = GetDistance(targetPosition)
+							local tweenInfo = TweenInfo.new(distance / 100, Enum.EasingStyle.Linear)
+
+							-- Tạo tween đến vị trí an toàn
+							local targetCFrame = CFrame.new(targetPosition)
+							local tween = TweenService:Create(hrp, tweenInfo, { CFrame = targetCFrame })
+							tween:Play()
+						end
+					end
                 end
 
                 task.wait(1)
