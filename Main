@@ -1280,12 +1280,13 @@ Ect:AddToggle({
 -- Khởi tạo trạng thái cho 2 boss
 local flesh = 0
 local enmu = 0
+local fly = 0
 
--- Thêm toggle Boss Handler vào GUI
+
 Ect:AddToggle({
-    Name = "Boss Handler", 
+    Name = "Auto Mugen", 
     Value = false, 
-    Flag = "BossHandler",
+    Flag = "AutoMugen",
     Callback = function(State)
         task.spawn(function()
             while State and IsOpen() do
@@ -1337,7 +1338,8 @@ Ect:AddToggle({
                         local player = game.Players.LocalPlayer
                         local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
 
-                        if hrp then
+                        if hrp and fly == 0 then
+							fly = 1
                             -- Lùi 200 đơn vị
                             local targetPosition = hrp.Position - hrp.CFrame.LookVector * 200
 
