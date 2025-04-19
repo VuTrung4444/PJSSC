@@ -1332,7 +1332,6 @@ Ect:AddToggle({
 					if hasAkaza then
 						StopAutoClash()
 						print(">> tắt AutoClash")
-						print(">> Akaza phát hiện => Di chuyển đến vị trí an toàn")
 
 						local player = game.Players.LocalPlayer
 						local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
@@ -1356,6 +1355,7 @@ Ect:AddToggle({
 							local targetCFrame = CFrame.new(targetPosition)
 							local tween = TweenService:Create(hrp, tweenInfo, { CFrame = targetCFrame })
 							tween:Play()
+print(">> Akaza phát hiện => Di chuyển đến vị trí an toàn")
 						end
 					end
                 end
