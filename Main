@@ -1337,7 +1337,7 @@ Ect:AddToggle({
 						local player = game.Players.LocalPlayer
 						local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
 
-						if hrp and fly == 0 then
+						if hrp and fly == 0 and not hasFlesh then
 							fly = 1
 
 							-- Vị trí an toàn cố định
