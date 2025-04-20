@@ -2491,8 +2491,8 @@ local function startMoveLoop()
             VisitedBosses[boss.Name] = true
             LastVisitedBoss = boss
 
-            print("[Tween] Chờ 5 giây trước khi tiếp tục.")
-            task.wait(5)
+            print("[Tween] Chờ 1 giây trước khi tiếp tục.")
+            task.wait(1)
             isTweening = false
             print("[Tween] isTweening = false")
         end
