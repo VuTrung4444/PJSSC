@@ -5,7 +5,8 @@ local Subs = Library.subs
 local IsOpen = Subs.Wait
 
 local mainMenuPlaceID = 5956785391
-
+local placeId = game.PlaceId
+local mapName
 local DailySpinEnabled = false
 local ClanSpinEnabled = false
 
@@ -1172,45 +1173,7 @@ for _, skill in ipairs({"Z", "X", "C", "V", "B", "N"}) do
     })
 end
 
-local AutoEatSouls = false
 
-Ect:AddToggle({
-    Name = "Auto Eat Souls",
-    Value = false,
-    Flag = "Souls",
-    Callback = function(State)
-        AutoEatSouls = State
-    end
-})
-
-Ect:AddToggle({
-    Name = "Auto Collect Orbs",
-    Value = false,
-    Flag = "AutoOrb",
-    Callback = function(State)
-        LIPJRMAL = State
-
-        task.spawn(function()
-            while LIPJRMAL and IsOpen() do
-                if not HumanoidRootPart or not HumanoidRootPart.Parent then
-                    HumanoidRootPart = plr.Character and plr.Character:FindFirstChild("HumanoidRootPart")
-                end
-
-                for _, v in ipairs(Map:GetChildren()) do
-                    if v:IsA("Model") and v:FindFirstChild("Sound") then
-                        for _, v1 in ipairs(v:GetChildren()) do
-                            if v1:FindFirstChild("TouchInterest") then
-                                v:PivotTo(HumanoidRootPart.CFrame)
-                            end
-                        end
-                    end
-                end
-
-                task.wait(0.5)
-            end
-        end)
-    end
-})
 
 local Formatted = ("%svs"):format(Player.Name)
 local autoClashRunning = false
@@ -1281,7 +1244,7 @@ Ect:AddToggle({
 local flesh = 0
 local enmu = 0
 local fly = 0
-
+local movedToCodeAndSafe = false
 
 Ect:AddToggle({
     Name = "Auto Mugen", 
@@ -1289,70 +1252,161 @@ Ect:AddToggle({
     Flag = "AutoMugen",
     Callback = function(State)
         task.spawn(function()
-            while State and IsOpen() do
-                local config = workspace:FindFirstChild("Mobs") and workspace.Mobs:FindFirstChild("Npc_Configuration")
+            if placeId == 13883059853 then
+                while State and IsOpen() do
+                    local clock2 = workspace:FindFirstChild("MugenTrain") and workspace.MugenTrain:FindFirstChild("Clock2")
+                    if clock2 and clock2:FindFirstChild("Hours") and clock2:FindFirstChild("Minutes") then
+                        local hourPos = clock2.Hours.Position
+                        local minutePos = clock2.Minutes.Position
 
-                if config then
-                    local hasEnmu = config:FindFirstChild("Enmu") ~= nil
-                    local hasFlesh = config:FindFirstChild("Flesh Monster") ~= nil
-                    local hasAkaza = config:FindFirstChild("Akaza") ~= nil
+ 						if hourPos.X == 653.6034545898438 and hourPos.Y == 511.4162292480469 and hourPos.Z == 1040.3822021484375 and
+                           minutePos.X == 653.6033935546875 and minutePos.Y == 511.4163513183594 and minutePos.Z == 1040.382080078125 then
+                            print("Thời gian trùng khớp")
+                            -- Gọi lệnh tắt AutoFarm & MoveAround + chờ nhỏ
+                            pcall(StopAutoFarm)
+                            pcall(StopMoveAround)
+                            task.wait(0.25)
 
-                    -- Phát hiện Enmu
-                    if hasEnmu then
-                        if enmu == 0 then
-                            enmu = 1
-                            print(">> Enmu xuất hiện.")
-                        end
-                    else
-                        if enmu == 1 then
-                            enmu = 0
-                            print(">> Enmu biến mất.")
-                            getgenv().Arrow = false
-                            pcall(stopArrow275Loop)
-                            print(">> Mất Enmu nhưng chưa có Flesh Monster => tắt startArrow275Loop")
+                            local targetPosition = Vector3.new(758.41, 500.17, 1093.127) -- 🛠️ Thay toạ độ thật ở đây
+                            Tween(CFrame.new(targetPosition))
+                            print(">> Clock2 đúng vị trí => Di chuyển tới tọa độ")
+                            break
                         end
                     end
+                    task.wait(0.5)
+                end  -- end của while loop
 
-                    -- Phát hiện Flesh Monster
-                    if hasFlesh then
-                        if flesh == 0 then
-                            flesh = 1
-                            print(">> Flesh Monster xuất hiện => chờ 5s rồi bật startArrow275Loop")
-                            if not getgenv().Arrow then
-                                task.delay(5, function()
-                                    getgenv().Arrow = true
-                                    pcall(startArrow275Loop)
-                                    StartAutoClash()
-                                    print(">> bật AutoClash")
-                                end)
+            elseif placeId == 11468034852 then
+			
+                local player = game.Players.LocalPlayer
+                local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+
+                if hrp and not movedToCodeAndSafe then  -- Kiểm tra xem chưa di chuyển và chưa thực hiện hành động này
+				print("Đúng toạ độ")
+
+                    -- Di chuyển đến toạ độ CODE
+                    local codePos = Vector3.new(1950.95, 24.48, -76.23) -- 🛠️ Thay tọa độ Code thật ở đây
+                    Tween(CFrame.new(codePos))
+                    print(">> Di chuyển đến toạ độ CODE")
+                    task.wait(2)
+
+                    -- Di chuyển đến Safe
+                    local safePos = Vector3.new(1699.58, 25, -112.58)
+                    Tween(CFrame.new(safePos))
+                    print(">> Di chuyển đến toạ độ SAFE")
+
+                    movedToCodeAndSafe = true  -- Đánh dấu là đã di chuyển
+                end
+                task.wait(0.5)
+
+                -- Bắt đầu xử lý sau khi di chuyển
+                while State and IsOpen() do
+                    local config = workspace:FindFirstChild("Mobs") and workspace.Mobs:FindFirstChild("Npc_Configuration")
+
+                    if config then
+                        local hasEnmu = config:FindFirstChild("Enmu") ~= nil
+                        local hasFlesh = config:FindFirstChild("Flesh Monster") ~= nil
+                        local hasAkaza = config:FindFirstChild("Akaza") ~= nil
+
+                        -- Phát hiện Enmu
+                        if hasEnmu then
+                            if enmu == 0 then
+                                enmu = 1
+                                print(">> Enmu xuất hiện.")
+                            end
+                        else
+                            if enmu == 1 then
+                                enmu = 0
+                                print(">> Enmu biến mất.")
+                                getgenv().Arrow = false
+                                pcall(stopArrow275Loop)
+                                print(">> Mất Enmu nhưng chưa có Flesh Monster => tắt startArrow275Loop")
+                            end
+                        end
+
+                        -- Phát hiện Flesh Monster
+                        if hasFlesh then
+                            if flesh == 0 then
+                                flesh = 1
+                                print(">> Flesh Monster xuất hiện => chờ 5s rồi bật startArrow275Loop")
+                                if not getgenv().Arrow then
+                                    task.delay(5, function()
+                                        getgenv().Arrow = true
+                                        pcall(startArrow275Loop)
+                                        StartAutoClash()
+                                        print(">> bật AutoClash")
+                                    end)
+                                end
+                            end
+                        end
+
+                        -- Nếu có Akaza trong khi AutoClash đang chạy
+                        if hasAkaza and autoClashRunning then
+                            StopAutoClash()
+                            print(">> tắt AutoClash")
+
+                            local player = game.Players.LocalPlayer
+                            local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+
+                            if hrp and fly == 0 and not hasFlesh then
+                                fly = 1
+
+                                local targetPosition = Vector3.new(-1328.95, 739.72, -888.61)
+                                Tween(CFrame.new(targetPosition))
+
+                                print(">> Akaza phát hiện => Di chuyển đến vị trí an toàn")
                             end
                         end
                     end
 
-					if hasAkaza and autoClashRunning then
-    StopAutoClash()
-    print(">> tắt AutoClash")
+                    task.wait(1)
+                end  -- end của while loop
+            end  -- end của elseif placeId == 11468034852
+        end)
+    end  -- end của Callback function
+})
 
-    local player = game.Players.LocalPlayer
-    local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
 
-    if hrp and fly == 0 and not hasFlesh then
-        fly = 1
 
-        local targetPosition = Vector3.new(-1328.95, 739.72, -888.61)
-        Tween(CFrame.new(targetPosition))
+local AutoEatSouls = false
 
-        print(">> Akaza phát hiện => Di chuyển đến vị trí an toàn")
+Ect:AddToggle({
+    Name = "Auto Eat Souls",
+    Value = false,
+    Flag = "Souls",
+    Callback = function(State)
+        AutoEatSouls = State
     end
-end
+})
+
+Ect:AddToggle({
+    Name = "Auto Collect Orbs",
+    Value = false,
+    Flag = "AutoOrb",
+    Callback = function(State)
+        LIPJRMAL = State
+
+        task.spawn(function()
+            while LIPJRMAL and IsOpen() do
+                if not HumanoidRootPart or not HumanoidRootPart.Parent then
+                    HumanoidRootPart = plr.Character and plr.Character:FindFirstChild("HumanoidRootPart")
                 end
 
-                task.wait(1)
+                for _, v in ipairs(Map:GetChildren()) do
+                    if v:IsA("Model") and v:FindFirstChild("Sound") then
+                        for _, v1 in ipairs(v:GetChildren()) do
+                            if v1:FindFirstChild("TouchInterest") then
+                                v:PivotTo(HumanoidRootPart.CFrame)
+                            end
+                        end
+                    end
+                end
+
+                task.wait(0.5)
             end
         end)
     end
 })
-
 
 
 
@@ -1417,9 +1471,6 @@ function UpdateActiveBossLocations()
     end
 
 end
-
-local placeId = game.PlaceId
-local mapName
 
 if placeId == 13883279773 then
     mapName = "Map1"
@@ -2339,14 +2390,13 @@ AuraTab:AddToggle({
     end
 })
 
-
-
 --MoveAround--
 local MoveLoop = nil
 local AllBosses = {}  -- Danh sách tất cả boss có thể farm
 local VisitedBosses = {}  -- Danh sách các boss đã ghé thăm
 
 local function startMoveLoop()
+if placeId == 13883279773  or placeId == 13883059853 then
     -- Kiểm tra nếu MoveLoop đã tồn tại, hủy nó trước khi tạo lại
     if MoveLoop then
         task.cancel(MoveLoop)  -- Hủy task thread cũ
@@ -2418,9 +2468,10 @@ local function startMoveLoop()
             end
 
             VisitedBosses[boss.Name] = true
-            task.wait(1) -- Dừng 1 giây trước khi đi tiếp boss khác
+            task.wait(2) 
         end
     end)
+end
 end
 
 game:GetService("RunService").Heartbeat:Connect(function()
@@ -2448,7 +2499,6 @@ game:GetService("RunService").Heartbeat:Connect(function()
         end
     end
 end)
-
 
 
 --// Update Labels / Dropdowns \\--
