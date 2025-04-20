@@ -1257,8 +1257,7 @@ Ect:AddToggle({
                     local clock2 = workspace:FindFirstChild("MugenTrain") and workspace.MugenTrain:FindFirstChild("Clock2")
                     if clock2 and clock2:FindFirstChild("Hours") and clock2:FindFirstChild("Minutes") then
                         local hourPos = clock2.Hours:GetPivot().Position
--- hoặc nếu bạn set PrimaryPart cho nó:
-local hourPos = clock2.Hours:GetPrimaryPartCFrame().Position
+local minutePos = clock2.Minutes:GetPivot().Position
 
  						if hourPos.X == 653.6034545898438 and hourPos.Y == 511.4162292480469 and hourPos.Z == 1040.3822021484375 and
                            minutePos.X == 653.6033935546875 and minutePos.Y == 511.4163513183594 and minutePos.Z == 1040.382080078125 then
