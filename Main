@@ -1259,9 +1259,7 @@ while State and IsOpen() do
         local hourCF = clock2.Hours:GetPivot()
         local minuteCF = clock2.Minutes:GetPivot()
 
-        print("Hour - Right:", hourCF.RightVector, "Up:", hourCF.UpVector, "Look:", hourCF.LookVector)
-        print("Minute - Right:", minuteCF.RightVector, "Up:", minuteCF.UpVector, "Look:", minuteCF.LookVector)
-
+        
         local function isCloseVector(v1, v2, epsilon)
             return (v1 - v2).Magnitude <= (epsilon or 0.001)
         end
@@ -1273,7 +1271,7 @@ while State and IsOpen() do
            isCloseVector(minuteCF.UpVector, Vector3.new(0, 0, -1)) and
            isCloseVector(minuteCF.LookVector, Vector3.new(0, -1, 0)) then
 
-            print("Thời gian trùng khớp")
+            
             -- Gọi lệnh tắt AutoFarm & MoveAround + chờ nhỏ
             pcall(StopAutoFarm)
             pcall(StopMoveAround)
@@ -2414,11 +2412,11 @@ local AllBosses = {}
 
 local function startMoveLoop()
     if MoveLoopRunning then 
-        print("[MoveLoop] Đã chạy rồi, không tạo thêm.")
+        
         return 
     end
     MoveLoopRunning = true
-    print("[MoveLoop] Bắt đầu loop...")
+
 
     MoveLoop = task.spawn(function()
         local player = game.Players.LocalPlayer
@@ -2427,15 +2425,14 @@ local function startMoveLoop()
 
         while getgenv().MoveAround do
             if not character or not character:FindFirstChild("HumanoidRootPart") then
-                print("[MoveLoop] Chờ nhân vật spawn...")
+                
                 character = player.CharacterAdded:Wait()
                 task.wait(1)
             end
 
             UpdateActiveBossLocations()
             if #ActiveBossLocations == 0 then
-                print("[MoveLoop] Không có boss hoạt động.")
-                task.wait(1)
+                
                 continue
             end
 
@@ -2470,17 +2467,17 @@ local function startMoveLoop()
 
             local boss = candidateBosses[1]
             if not boss then
-                print("[MoveLoop] Không tìm thấy boss.")
+                
                 task.wait(1)
                 continue
             end
 
-            print("[Tween] Bắt đầu di chuyển tới boss:", boss.Name)
+            
             isTweening = true
-            print("[Tween] isTweening = true")
+            
 
             if CurrentTween then
-                print("[Tween] Hủy tween cũ.")
+                
                 CurrentTween:Cancel()
                 CurrentTween = nil
             end
@@ -2494,22 +2491,22 @@ local function startMoveLoop()
             until GetDistance(boss.Position) < 2 or not getgenv().MoveAround
 
             if CurrentTween then
-                print("[Tween] Đã đến boss, hủy tween.")
+                
                 CurrentTween:Cancel()
                 CurrentTween = nil
             end
 
-            print("[Boss] Ghé boss:", boss.Name)
+            
             VisitedBosses[boss.Name] = true
             LastVisitedBoss = boss
 
-            print("[Tween] Chờ 1 giây trước khi tiếp tục.")
+            
             task.wait(1)
             isTweening = false
-            print("[Tween] isTweening = false")
+            
         end
 
-        print("[MoveLoop] Dừng loop.")
+        
         MoveLoopRunning = false
     end)
 end
@@ -2519,16 +2516,16 @@ game:GetService("RunService").Heartbeat:Connect(function()
     local character = player.Character
 
     if getgenv().MoveAround and not MoveLoopRunning then
-        print("[Heartbeat] Bật MoveAround. Bắt đầu MoveLoop.")
+        
         startMoveLoop()
     elseif not getgenv().MoveAround and MoveLoop then
-        print("[Heartbeat] Tắt MoveAround. Hủy MoveLoop.")
+        
         task.cancel(MoveLoop)
         MoveLoop = nil
         MoveLoopRunning = false
     elseif getgenv().MoveAround and character ~= LastCharacter then
         LastCharacter = character
-        print("[Heartbeat] Nhân vật mới. Khởi động lại loop.")
+        
         task.wait(4)
 
         if MoveLoop then
