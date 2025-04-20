@@ -1253,33 +1253,40 @@ Ect:AddToggle({
     Callback = function(State)
         task.spawn(function()
             if placeId == 13883059853 then
-                while State and IsOpen() do
-                    local clock2 = workspace:FindFirstChild("MugenTrain") and workspace.MugenTrain:FindFirstChild("Clock2")
-                    if clock2 and clock2:FindFirstChild("Hours") and clock2:FindFirstChild("Minutes") then
-                        local hourPos = clock2.Hours:GetPivot().Position
-local minutePos = clock2.Minutes:GetPivot().Position
-print("Hour Position:", hourPos)
-print(string.format("X: %.15f, Y: %.15f, Z: %.15f", hourPos.X, hourPos.Y, hourPos.Z))
+while State and IsOpen() do
+    local clock2 = workspace:FindFirstChild("MugenTrain") and workspace.MugenTrain:FindFirstChild("Clock2")
+    if clock2 and clock2:FindFirstChild("Hours") and clock2:FindFirstChild("Minutes") then
+        local hourCF = clock2.Hours:GetPivot()
+        local minuteCF = clock2.Minutes:GetPivot()
 
-print("Minute Position:", minutePos)
-print(string.format("X: %.15f, Y: %.15f, Z: %.15f", minutePos.X, minutePos.Y, minutePos.Z))
+        print("Hour - Right:", hourCF.RightVector, "Up:", hourCF.UpVector, "Look:", hourCF.LookVector)
+        print("Minute - Right:", minuteCF.RightVector, "Up:", minuteCF.UpVector, "Look:", minuteCF.LookVector)
 
- 						if hourPos.X == 653.6034545898438 and hourPos.Y == 511.4162292480469 and hourPos.Z == 1040.3822021484375 and
-                           minutePos.X == 653.6033935546875 and minutePos.Y == 511.4163513183594 and minutePos.Z == 1040.382080078125 then
-                            print("Thời gian trùng khớp")
-                            -- Gọi lệnh tắt AutoFarm & MoveAround + chờ nhỏ
-                            pcall(StopAutoFarm)
-                            pcall(StopMoveAround)
-                            task.wait(0.25)
+        local function isCloseVector(v1, v2, epsilon)
+            return (v1 - v2).Magnitude <= (epsilon or 0.001)
+        end
 
-                            local targetPosition = Vector3.new(758.41, 500.17, 1093.127) -- 🛠️ Thay toạ độ thật ở đây
-                            Tween(CFrame.new(targetPosition))
-                            print(">> Clock2 đúng vị trí => Di chuyển tới tọa độ")
-                            break
-                        end
-                    end
-                    task.wait(0.5)
-                end  -- end của while loop
+        if isCloseVector(hourCF.RightVector, Vector3.new(0, 1, 0)) and
+           isCloseVector(hourCF.UpVector, Vector3.new(0, 0, -1)) and
+           isCloseVector(hourCF.LookVector, Vector3.new(1, 0, 0)) and
+           isCloseVector(minuteCF.RightVector, Vector3.new(1, 0, 0)) and
+           isCloseVector(minuteCF.UpVector, Vector3.new(0, 0, -1)) and
+           isCloseVector(minuteCF.LookVector, Vector3.new(0, -1, 0)) then
+
+            print("Thời gian trùng khớp")
+            -- Gọi lệnh tắt AutoFarm & MoveAround + chờ nhỏ
+            pcall(StopAutoFarm)
+            pcall(StopMoveAround)
+            task.wait(0.25)
+
+            local targetPosition = Vector3.new(758.41, 500.17, 1093.127) -- 🛠️ Thay toạ độ thật ở đây
+            Tween(CFrame.new(targetPosition))
+            print(">> Clock2 đúng vị trí => Di chuyển tới tọa độ")
+            break
+        end
+    end
+    task.wait(0.5)
+end
 
             elseif placeId == 11468034852 then
 			
