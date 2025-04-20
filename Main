@@ -2392,33 +2392,48 @@ AuraTab:AddToggle({
 })
 
 --MoveAround--
+
 local MoveLoop = nil
-local AllBosses = {}  -- Danh sách tất cả boss có thể farm
-local VisitedBosses = {}  -- Danh sách các boss đã ghé thăm
+local MoveLoopRunning = false
+local isTweening = false
+local CurrentTween = nil
+local LastVisitedBoss = nil
+local VisitedBosses = {}
+local AllBosses = {}
 
 local function startMoveLoop()
-if placeId == 13883279773  or placeId == 13883059853 then
-    -- Kiểm tra nếu MoveLoop đã tồn tại, hủy nó trước khi tạo lại
-    if MoveLoop then
-        task.cancel(MoveLoop)  -- Hủy task thread cũ
+    if MoveLoopRunning then 
+        print("[MoveLoop] Đã chạy rồi, không tạo thêm.")
+        return 
     end
+    MoveLoopRunning = true
+    print("[MoveLoop] Bắt đầu loop...")
 
     MoveLoop = task.spawn(function()
-        LastCharacter = currentCharacter -- Cập nhật nhân vật mới
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        LastCharacter = character
+
         while getgenv().MoveAround do
-            local player = game.Players.LocalPlayer
-            if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then
-                player.CharacterAdded:Wait()
+            if not character or not character:FindFirstChild("HumanoidRootPart") then
+                print("[MoveLoop] Chờ nhân vật spawn...")
+                character = player.CharacterAdded:Wait()
                 task.wait(1)
             end
-            
+
             UpdateActiveBossLocations()
             if #ActiveBossLocations == 0 then
+                print("[MoveLoop] Không có boss hoạt động.")
                 task.wait(1)
                 continue
             end
 
-            -- Cập nhật danh sách tất cả boss nếu chưa có
+            if isTweening then
+                print("[MoveLoop] Đang tween, đợi xong rồi mới đi tiếp.")
+                task.wait(1)
+                continue
+            end
+
             if #AllBosses == 0 then
                 for _, boss in pairs(ActiveBossLocations) do
                     table.insert(AllBosses, boss)
@@ -2432,10 +2447,10 @@ if placeId == 13883279773  or placeId == 13883059853 then
                 end
             end
 
-            -- Nếu đã đi hết boss, reset danh sách VisitedBosses
             if #candidateBosses == 0 then
                 VisitedBosses = {}
                 candidateBosses = ActiveBossLocations
+                print("[MoveLoop] Reset danh sách boss đã ghé.")
             end
 
             table.sort(candidateBosses, function(a, b)
@@ -2444,63 +2459,79 @@ if placeId == 13883279773  or placeId == 13883059853 then
 
             local boss = candidateBosses[1]
             if not boss then
+                print("[MoveLoop] Không tìm thấy boss.")
                 task.wait(1)
                 continue
             end
 
-            local bossCFrame = CFrame.new(boss.Position)
-            local TweenFa = Tween(bossCFrame)
+            print("[Tween] Bắt đầu di chuyển tới boss:", boss.Name)
+            isTweening = true
+            print("[Tween] isTweening = true")
 
-            repeat
-                task.wait()
-                if not game.Players.LocalPlayer.Character then
-                    if TweenFa then
-                        TweenFa:Cancel()
-                        TweenFa = nil
-                    end
-                    break
-                end
-            until not getgenv().MoveAround or GetDistance(bossCFrame) < 20
-
-            if not getgenv().MoveAround then break end
-            if TweenFa then
-                TweenFa:Cancel()
-                TweenFa = nil
+            if CurrentTween then
+                print("[Tween] Hủy tween cũ.")
+                CurrentTween:Cancel()
+                CurrentTween = nil
             end
 
+            local bossCFrame = CFrame.new(boss.Position)
+            CurrentTween = Tween(bossCFrame)
+
+            -- Chờ cho tới khi đến gần boss
+            repeat
+                task.wait(0.1)
+            until GetDistance(boss.Position) < 2 or not getgenv().MoveAround
+
+            if CurrentTween then
+                print("[Tween] Đã đến boss, hủy tween.")
+                CurrentTween:Cancel()
+                CurrentTween = nil
+            end
+
+            print("[Boss] Ghé boss:", boss.Name)
             VisitedBosses[boss.Name] = true
-            task.wait(2) 
+            LastVisitedBoss = boss
+
+            print("[Tween] Chờ 5 giây trước khi tiếp tục.")
+            task.wait(5)
+            isTweening = false
+            print("[Tween] isTweening = false")
         end
+
+        print("[MoveLoop] Dừng loop.")
+        MoveLoopRunning = false
     end)
-end
 end
 
 game:GetService("RunService").Heartbeat:Connect(function()
     local player = game.Players.LocalPlayer
-    local currentCharacter = player.Character
+    local character = player.Character
 
-    if getgenv().MoveAround and not MoveLoop then
+    if getgenv().MoveAround and not MoveLoopRunning then
+        print("[Heartbeat] Bật MoveAround. Bắt đầu MoveLoop.")
         startMoveLoop()
     elseif not getgenv().MoveAround and MoveLoop then
-        -- Khi MoveAround bị tắt, hủy thread MoveLoop
+        print("[Heartbeat] Tắt MoveAround. Hủy MoveLoop.")
         task.cancel(MoveLoop)
         MoveLoop = nil
-    elseif getgenv().MoveAround and MoveLoop and currentCharacter ~= LastCharacter then
-        LastCharacter = currentCharacter -- Cập nhật nhân vật mới
-        task.wait(4) -- Chờ 4 giây sau khi hồi sinh
+        MoveLoopRunning = false
+    elseif getgenv().MoveAround and character ~= LastCharacter then
+        LastCharacter = character
+        print("[Heartbeat] Nhân vật mới. Khởi động lại loop.")
+        task.wait(4)
 
-        if MoveLoop then -- Kiểm tra kỹ xem MoveLoop có còn tồn tại không trước khi hủy
-            task.cancel(MoveLoop) -- Hủy thread MoveLoop hiện tại
+        if MoveLoop then
+            task.cancel(MoveLoop)
             MoveLoop = nil
+            MoveLoopRunning = false
         end
 
-        task.wait(2) -- Chờ một chút để đảm bảo toggle tắt
-        if getgenv().MoveAround then -- Đảm bảo MoveAround vẫn đang bật
+        task.wait(2)
+        if getgenv().MoveAround then
             startMoveLoop()
         end
     end
 end)
-
 
 --// Update Labels / Dropdowns \\--
 spawn(function()
