@@ -2024,6 +2024,14 @@ game:GetService("RunService").Heartbeat:Connect(function()
     end
 end)
 
+function StopAutoFarm()
+    getgenv().Farm = false
+    if FarmLoop then
+        task.cancel(FarmLoop)
+        FarmLoop = nil
+    end
+end
+
 AuraTab:AddToggle({
     Name = "Swamp Aura [Near Mobs]",
     Flag = "Swamp",
@@ -2488,7 +2496,7 @@ local function startMoveLoop()
             -- Chờ cho tới khi đến gần boss
             repeat
                 task.wait(0.1)
-            until GetDistance(boss.Position) < 2 or not getgenv().MoveAround
+            until GetDistance(boss.Position) < 20 or not getgenv().MoveAround
 
             if CurrentTween then
                 
@@ -2540,6 +2548,30 @@ game:GetService("RunService").Heartbeat:Connect(function()
         end
     end
 end)
+
+function StopMoveAround()
+    getgenv().MoveAround = false
+
+    -- Hủy vòng lặp nếu đang chạy
+    if MoveLoop then
+        task.cancel(MoveLoop)
+        MoveLoop = nil
+    end
+
+    -- Hủy tween nếu đang tween
+    if CurrentTween then
+        CurrentTween:Cancel()
+        CurrentTween = nil
+    end
+
+    -- Reset lại toàn bộ biến
+    MoveLoopRunning = false
+    isTweening = false
+    LastVisitedBoss = nil
+    VisitedBosses = {}
+    AllBosses = {}
+end
+
 
 --// Update Labels / Dropdowns \\--
 spawn(function()
