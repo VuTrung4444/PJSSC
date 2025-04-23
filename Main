@@ -2038,35 +2038,41 @@ AuraTab:AddToggle({
     Callback = function(v)
         getgenv().Swamp = v
         if v then
+            -- Tấn công nếu gần boss
             task.spawn(function()
                 while getgenv().Swamp do 
                     local bossEntity = getclosest(AllowedBosses, game:GetService("Workspace").Mobs)
                     
                     if bossEntity and bossEntity:FindFirstChild("Humanoid") and bossEntity.Humanoid.Health > 0 then
                         local bossCFrame = bossEntity:GetModelCFrame()
+                        local distance = (bossCFrame.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
 
-                        local args = {
-                            [1] = "swamp_puddle_damage",
-                            [2] = game.Players.LocalPlayer.Character,
-                            [3] = bossCFrame
-                        }          
-                        game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))                
+                        if distance < 25 then
+                            local args = {
+                                [1] = "swamp_puddle_damage",
+                                [2] = game.Players.LocalPlayer.Character,
+                                [3] = bossCFrame
+                            }          
+                            game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))     
+                        end           
                     end
                     task.wait(0.3)
                 end
             end)
+
+            -- Kích hoạt skill định kỳ
             task.spawn(function()
                 while getgenv().Swamp do
-					if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-                   	 local args = {
-                        [1] = "skil_ting_asd",
-                        [2] = game.Players.LocalPlayer,
-                        [3] = "swampbda_swamp_puddle",
-                        [4] = 5
-                    }
-                    game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))        
-                    task.wait(9.5)
-					end
+                    if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+                        local args = {
+                            [1] = "skil_ting_asd",
+                            [2] = game.Players.LocalPlayer,
+                            [3] = "swampbda_swamp_puddle",
+                            [4] = 5
+                        }
+                        game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))        
+                        task.wait(9.5)
+                    end
                 end
             end)
         end
