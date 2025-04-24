@@ -691,12 +691,19 @@ MainSection:AddToggle({
     Flag = "MoveAroundBosses",
     Callback = function(v)
         getgenv().MoveAround = v
-        if not v then
+        if v then
+            task.delay(0.1, function()
+                if not MoveLoopRunning then
+                    startMoveLoop()
+                end
+            end)
+        else
             local plr = game.Players.LocalPlayer
             if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
                 local humanoid = plr.Character:FindFirstChildOfClass("Humanoid")
                 humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
             end
+            StopMoveAround()
         end
     end
 })
@@ -2423,14 +2430,11 @@ local CurrentTween = nil
 local LastVisitedBoss = nil
 local VisitedBosses = {}
 local AllBosses = {}
+local LastCharacter = nil
 
 local function startMoveLoop()
-    if MoveLoopRunning then 
-        
-        return 
-    end
+    if MoveLoopRunning then return end
     MoveLoopRunning = true
-
 
     MoveLoop = task.spawn(function()
         local player = game.Players.LocalPlayer
@@ -2439,14 +2443,12 @@ local function startMoveLoop()
 
         while getgenv().MoveAround do
             if not character or not character:FindFirstChild("HumanoidRootPart") then
-                
                 character = player.CharacterAdded:Wait()
                 task.wait(1)
             end
 
             UpdateActiveBossLocations()
             if #ActiveBossLocations == 0 then
-                
                 continue
             end
 
@@ -2481,17 +2483,13 @@ local function startMoveLoop()
 
             local boss = candidateBosses[1]
             if not boss then
-                
                 task.wait(1)
                 continue
             end
 
-            
             isTweening = true
-            
 
             if CurrentTween then
-                
                 CurrentTween:Cancel()
                 CurrentTween = nil
             end
@@ -2499,28 +2497,22 @@ local function startMoveLoop()
             local bossCFrame = CFrame.new(boss.Position)
             CurrentTween = Tween(bossCFrame)
 
-            -- Chờ cho tới khi đến gần boss
             repeat
                 task.wait(0.1)
             until GetDistance(boss.Position) < 70 or not getgenv().MoveAround
 
             if CurrentTween then
-                
                 CurrentTween:Cancel()
                 CurrentTween = nil
             end
 
-            
             VisitedBosses[boss.Name] = true
             LastVisitedBoss = boss
 
-            
             task.wait(1)
             isTweening = false
-            
         end
 
-        
         MoveLoopRunning = false
     end)
 end
@@ -2530,24 +2522,19 @@ game:GetService("RunService").Heartbeat:Connect(function()
     local character = player.Character
 
     if getgenv().MoveAround and not MoveLoopRunning then
-        
         startMoveLoop()
     elseif not getgenv().MoveAround and MoveLoop then
-        
         task.cancel(MoveLoop)
         MoveLoop = nil
         MoveLoopRunning = false
     elseif getgenv().MoveAround and character ~= LastCharacter then
         LastCharacter = character
-        
         task.wait(4)
-
         if MoveLoop then
             task.cancel(MoveLoop)
             MoveLoop = nil
             MoveLoopRunning = false
         end
-
         task.wait(2)
         if getgenv().MoveAround then
             startMoveLoop()
