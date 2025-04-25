@@ -485,6 +485,7 @@ local AllowedBosses = {
 	"Nomay Bandit Boss",
 	"Wop1",
 	"Wop2",
+	"Bandit Zoku",
 	
 }
 
@@ -498,7 +499,8 @@ local BossLocationsMap1 = {
     { Name = "Susamaru", Position = Vector3.new(1367.45, 315.9, -4553.09) },
     { Name = "Bandit Kaden", Position = Vector3.new(-546.917, 304.467, -2860.067) },
     { Name = "Zanegutsu Kuuchie", Position = Vector3.new(-351.28, 445.36, -2331.425) },
-    { Name = "Sabito", Position = Vector3.new(1237.92, 275.42, -2807.998) }
+    { Name = "Sabito", Position = Vector3.new(1237.92, 275.42, -2807.998) },
+	{ Name = "Bandit Zoku", Position = Vector3.new(175.39, 282.88, -1964.26) }
 }
 
 local BossLocationsMap2 = {
