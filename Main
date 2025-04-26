@@ -950,6 +950,18 @@ MiscSection:AddToggle({
     Keybind = false,
     Callback = function (v)
         AutoCollectChest = v
+
+        if v then
+            -- Cập nhật lại thông tin nhân vật
+            local function GetCharacter()
+                local player = game:GetService("Players").LocalPlayer
+                local character = player.Character or player.CharacterAdded:Wait()
+                return character
+            end
+
+            -- Gọi để lấy lại thông tin ngay khi bật
+            Character = GetCharacter()
+        end
     end
 })
 
@@ -1504,20 +1516,33 @@ UpdateLists()
 spawn(function()
     while task.wait() do
         if AutoCollectChest then
-            for _, v in pairs(game:GetService("Workspace").Debree:GetChildren()) do
-                if v.Name == "Loot_Chest" then
-                    for i,c in pairs(v:FindFirstChild("Drops"):GetChildren()) do
-                            v["Add_To_Inventory"]:InvokeServer(c.Name)
-                            delay(0.5, function()
-                            c:Destroy()
-                        end)
+            local success, err = pcall(function()
+                local workspace = game:GetService("Workspace")
+                local debris = workspace:FindFirstChild("Debree")
+                if debris then
+                    for _, v in pairs(debris:GetChildren()) do
+                        if v.Name == "Loot_Chest" and v:FindFirstChild("Drops") then
+                            for i, c in pairs(v.Drops:GetChildren()) do
+                                if v:FindFirstChild("Add_To_Inventory") then
+                                    v["Add_To_Inventory"]:InvokeServer(c.Name)
+                                    delay(0.5, function()
+                                        if c then
+                                            c:Destroy()
+                                        end
+                                    end)
+                                end
+                            end
+                        end
                     end
                 end
+            end)
+            if not success then
+                warn("AutoCollectChest error: ", err)
             end
-		end 
-		
+        end
     end
 end)
+
 
 --Eat souls--
 task.spawn(function()
