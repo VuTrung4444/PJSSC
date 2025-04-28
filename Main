@@ -505,7 +505,7 @@ local BossLocationsMap1 = {
 
 local BossLocationsMap2 = {
     { Name = "Akeza", Position = Vector3.new(2006.46, 586, -130.2) },
-    { Name = "Inosuke", Position = Vector3.new(1620.34, 310.98, -390.1) },
+    { Name = "Inosuke", Position = Vector3.new(1620.34, 290.98, -390.1) },
     { Name = "Enme", Position = Vector3.new(1620.18, 500.61, -695.5775) },
 	{ Name = "Wop1", Position = Vector3.new(-278.02, 601.28, -602.12) },
     { Name = "Renpeke", Position = Vector3.new(-1265, 600.57, -659.554) },
