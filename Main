@@ -840,7 +840,7 @@ Settings:AddSlider({
 Settings:AddSlider({
     Name = "Tween Speed",
     Flag = "TweenSlider",
-    Value = 300,
+    Value = 200,
     Min = 150,
     Max = 500,
     Textbox = true,
@@ -1658,7 +1658,7 @@ task.spawn(function()
                     if (not debounce) and ((not game.Players.LocalPlayer:FindFirstChild("combotangasd123")) or game.Players.LocalPlayer:FindFirstChild("combotangasd123") and game.Players.LocalPlayer:FindFirstChild("combotangasd123").Value < 1) then 
                     debounce = true 
                     attack(attackMethods[Method])
-                    task.wait(1.25)
+                    task.wait(2)
                     debounce = false
                 end
             end
@@ -1669,7 +1669,7 @@ end)
 
 
 getgenv().Distance = 10
-getgenv().tweenspeed = 300
+getgenv().tweenspeed = 200
 
 
 --// Farm \\--
