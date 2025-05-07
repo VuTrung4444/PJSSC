@@ -654,6 +654,7 @@ local Settings = MainTab:CreateSection({Name = "Settings"})
 local KillAura = MainTab:CreateSection({Name = "Kill Aura", Side = "Right"})
 local Teleports = MainTab:CreateSection({Name = "Teleports", Side = "Right"})
 local Info = MainTab:CreateSection({Name = "Info", Side = "Right"})
+local Gourd = MainTab:CreateSection({Name = "Gourd", Side = "Right"})
 local AuraTab = MainTab:CreateSection({Name = "AuraSkills", Side = "Left"})
 
 
@@ -932,6 +933,144 @@ Teleports:AddButton({
         print("✅ Dịch chuyển thành công!")
     end
 })
+
+
+-- Thiết lập mặc định nếu cần
+getgenv().AutoGourd = false
+getgenv().GourdSize = "Big Gourd"
+getgenv().BuyingGourd = false  -- Biến để theo dõi trạng thái mua gourd
+
+
+-- Toggle Auto Gourd (Chỉ bật tắt thổi gourd)
+Gourd:AddToggle({
+    Name = "Auto Gourd",
+    Flag = "AutoGourd",
+    Keybind = false,
+    Callback = function(v)
+        getgenv().AutoGourd = v
+    end
+})
+
+-- Hàm đặt GourdSize và đảm bảo chỉ một toggle được bật
+local function setGourdSize(selected)
+    getgenv().GourdSize = selected
+    getgenv().SmallGourdToggle = (selected == "Small Gourd")
+    getgenv().MediumGourdToggle = (selected == "Medium Gourd")
+    getgenv().BigGourdToggle = (selected == "Big Gourd")
+end
+
+-- Toggle từng loại Gourd (Chỉ thực hiện mua khi bật toggle)
+Gourd:AddToggle({
+    Name = "Small Gourd",
+    Flag = "SmallGourdToggle",
+    Keybind = false,
+    Callback = function(v)
+        if v then
+            setGourdSize("Small Gourd")
+            getgenv().BuyingGourd = true  -- Bắt đầu mua
+        else
+            getgenv().BuyingGourd = false  -- Dừng mua
+        end
+    end
+})
+
+Gourd:AddToggle({
+    Name = "Medium Gourd",
+    Flag = "MediumGourdToggle",
+    Keybind = false,
+    Callback = function(v)
+        if v then
+            setGourdSize("Medium Gourd")
+            getgenv().BuyingGourd = true  -- Bắt đầu mua
+        else
+            getgenv().BuyingGourd = false  -- Dừng mua
+        end
+    end
+})
+
+Gourd:AddToggle({
+    Name = "Big Gourd",
+    Flag = "BigGourdToggle",
+    Keybind = false,
+    Callback = function(v)
+        if v then
+            setGourdSize("Big Gourd")
+            getgenv().BuyingGourd = true  -- Bắt đầu mua
+        else
+            getgenv().BuyingGourd = false  -- Dừng mua
+        end
+    end
+})
+
+-- Cấu hình gourd size tại đây
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+local Plr = Players.LocalPlayer
+local playerData = ReplicatedStorage:WaitForChild("Player_Data"):WaitForChild(Plr.Name)
+local yen = playerData:WaitForChild("Yen")
+local inventory = playerData:WaitForChild("Inventory")
+
+-- Tìm gourd trong backpack hoặc character
+local function findGourd()
+    return Plr.Backpack:FindFirstChild(getgenv().GourdSize) or Plr.Character:FindFirstChild(getgenv().GourdSize)
+end
+
+-- Chờ gourd xuất hiện
+local function waitForGourd(timeout)
+    local t = 0
+    while t < (timeout or 5) do
+        local gourd = findGourd()
+        if gourd then return gourd end
+        task.wait(0.5)
+        t += 0.5
+    end
+    return nil
+end
+
+-- Thổi gourd
+local function blowGourd(gourd)
+    for i = 1, 6 do
+        task.wait(1)
+        ReplicatedStorage.Remotes.To_Server.Handle_Initiate_S_:InvokeServer("blow_in_gourd_thing", Plr, gourd, 1)
+        print("Đã thổi", getgenv().GourdSize, "lần", i)
+    end
+end
+
+-- Mua gourd khi cần
+local function buyGourd()
+    print("→ Đang mua", getgenv().GourdSize)
+    ReplicatedStorage.Remotes.To_Server.Handle_Initiate_S:FireServer("buysomething", Plr, getgenv().GourdSize, yen, inventory)
+end
+
+-- Chuỗi xử lý chính
+task.spawn(function()
+    while true do
+        -- Kiểm tra nếu cần mua gourd
+        if getgenv().BuyingGourd then
+            buyGourd()
+            local newGourd = waitForGourd(8)
+            if newGourd then
+                print("✓ Mua thành công, thổi ngay")
+                blowGourd(newGourd)
+            else
+                warn("✗ Mua thất bại hoặc chưa thấy gourd")
+            end
+            task.wait(2)  -- Giãn cách thời gian mua để tránh gửi yêu cầu quá nhanh
+        end
+
+        -- Nếu bật Auto Gourd, thực hiện thổi gourd nếu có trong inventory
+        if getgenv().AutoGourd then
+            local gourd = findGourd()
+
+            if gourd then
+                print("→ Bắt đầu thổi", getgenv().GourdSize)
+                blowGourd(gourd)
+            end
+        end
+
+        task.wait(1) -- chờ trước khi kiểm tra lại
+    end
+end)
 
 
 
