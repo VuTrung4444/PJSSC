@@ -2606,7 +2606,7 @@ AuraTab:AddToggle({
         if v then
             -- Luồng tấn công sát thương
             task.spawn(function()
-                while getgenv().Reaper do 
+                while getgenv().Thunder do 
                     local target = getclosestSkills(game:GetService("Workspace").Mobs)
                     
                     if target and target:FindFirstChild("Humanoid") and target.Humanoid.Health > 0 then
