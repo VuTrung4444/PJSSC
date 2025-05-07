@@ -2147,7 +2147,7 @@ local function startFarmLoop()
                     end
                     break
                 end
-            until not getgenv().Farm or GetDistance(bossCFrame) < 70
+            until not getgenv().Farm or GetDistance(bossCFrame) < 20
 
             if not getgenv().Farm then break end
             if TweenFa then
@@ -2598,6 +2598,60 @@ AuraTab:AddToggle({
     end
 })
 
+AuraTab:AddToggle({
+    Name = "Thunder Aura [Near Mobs]", 
+    Flag = "Thunder", 
+    Callback = function(v)
+        getgenv().Thunder= v 
+        if v then
+            -- Luồng tấn công sát thương
+            task.spawn(function()
+                while getgenv().Reaper do 
+                    local target = getclosestSkills(game:GetService("Workspace").Mobs)
+                    
+                    if target and target:FindFirstChild("Humanoid") and target.Humanoid.Health > 0 then
+                        local targetCFrame = nil
+                        if target.GetModelCFrame and type(target.GetModelCFrame) == "function" then
+                            targetCFrame = target:GetModelCFrame()
+                        end
+
+                        if targetCFrame then
+                            local distance = (targetCFrame.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+
+                            -- Chỉ gây sát thương khi gần hơn 25
+                            if distance < 25 then
+                                local args = {
+                                    [1] = "thunder_clap_and_flash_damage", 
+                                    [2] = game.Players.LocalPlayer.Character,
+                                    [3] = targetCFrame
+                                }          
+                                game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))                
+                            end
+                        end
+                    end
+                    task.wait(2.5)
+                end
+            end)
+
+            -- Luồng kích hoạt skill
+            task.spawn(function()
+                while getgenv().Thunder do
+				 	if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+                                local args = {
+                                    [1] = "skil_ting_asd",
+                                    [2] = game.Players.LocalPlayer,
+                                    [3] = "ThunderClapAndFlash",
+                                    [4] = 5
+                                }
+                                game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))        
+                   				task.wait(9)
+					 end
+                end
+            end)
+        end
+    end
+})
+
 --MoveAround--
 
 local MoveLoop = nil
@@ -2676,7 +2730,7 @@ local function startMoveLoop()
 
             repeat
                 task.wait(0.1)
-            until GetDistance(boss.Position) < 70 or not getgenv().MoveAround
+            until GetDistance(boss.Position) < 20 or not getgenv().MoveAround
 
             if CurrentTween then
                 CurrentTween:Cancel()
