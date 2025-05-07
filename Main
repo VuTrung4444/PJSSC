@@ -1169,7 +1169,23 @@ MiscSection:AddToggle({
     end
 })
 
+MiscSection:AddToggle({
+    Name = "Auto Med",
+    Flag = "AutoMed",
+    Keybind = false,
+    Callback = function(v)
+        getgenv().AutoMed = v
+    end
+})
 
+MiscSection:AddToggle({
+    Name = "Auto Split",
+    Flag = "AutoSplit",
+    Keybind = false,
+    Callback = function(v)
+        getgenv().AutoSplit = v
+    end
+})
 
 AutoSkills:AddToggle({
     Name = "Auto Skill",
