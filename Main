@@ -1030,7 +1030,7 @@ end
 -- Thổi gourd
 local function blowGourd(gourd)
     for i = 1, 6 do
-        task.wait(1)
+        task.wait(0.5)
         ReplicatedStorage.Remotes.To_Server.Handle_Initiate_S_:InvokeServer("blow_in_gourd_thing", Plr, gourd, 1)
         print("Đã thổi", getgenv().GourdSize, "lần", i)
     end
@@ -1038,7 +1038,6 @@ end
 
 -- Mua gourd khi cần
 local function buyGourd()
-    print("→ Đang mua", getgenv().GourdSize)
     ReplicatedStorage.Remotes.To_Server.Handle_Initiate_S:FireServer("buysomething", Plr, getgenv().GourdSize, yen, inventory)
 end
 
@@ -1050,10 +1049,7 @@ task.spawn(function()
             buyGourd()
             local newGourd = waitForGourd(8)
             if newGourd then
-                print("✓ Mua thành công, thổi ngay")
                 blowGourd(newGourd)
-            else
-                warn("✗ Mua thất bại hoặc chưa thấy gourd")
             end
             task.wait(2)  -- Giãn cách thời gian mua để tránh gửi yêu cầu quá nhanh
         end
@@ -1063,7 +1059,6 @@ task.spawn(function()
             local gourd = findGourd()
 
             if gourd then
-                print("→ Bắt đầu thổi", getgenv().GourdSize)
                 blowGourd(gourd)
             end
         end
