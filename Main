@@ -2606,7 +2606,7 @@ AuraTab:AddToggle({
         if v then
             -- Luồng tấn công sát thương
             task.spawn(function()
-                while getgenv().Thunder do 
+                while getgenv().Thunder do  
                     local target = getclosestSkills(game:GetService("Workspace").Mobs)
                     
                     if target and target:FindFirstChild("Humanoid") and target.Humanoid.Health > 0 then
@@ -2618,10 +2618,10 @@ AuraTab:AddToggle({
                         if targetCFrame then
                             local distance = (targetCFrame.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
 
-                            -- Chỉ gây sát thương khi gần hơn 25
-                            if distance < 25 then
+                            -- Chỉ gây sát thương khi gần hơn 50
+                            if distance < 50 then
                                 local args = {
-                                    [1] = "thunder_clap_and_flash_damage", 
+                                    [1] = "ricespiritdamage", 
                                     [2] = game.Players.LocalPlayer.Character,
                                     [3] = targetCFrame
                                 }          
@@ -2629,18 +2629,18 @@ AuraTab:AddToggle({
                             end
                         end
                     end
-                    task.wait(2.5)
+                    task.wait(2) 
                 end
             end)
 
             -- Luồng kích hoạt skill
             task.spawn(function()
-                while getgenv().Thunder do
+                while getgenv().Thunder do 
 				 	if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
                                 local args = {
                                     [1] = "skil_ting_asd",
                                     [2] = game.Players.LocalPlayer,
-                                    [3] = "ThunderClapAndFlash",
+                                    [3] = "thunderbreathingricespirit",
                                     [4] = 5
                                 }
                                 game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))        
