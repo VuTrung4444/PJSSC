@@ -2832,7 +2832,7 @@ MiscSection:AddToggle({
         if state then
             -- Khi toggle được bật, chạy đoạn thay đổi tên hiển thị
             getgenv().Config = {
-                FakeDisplayName = "SKTxT1xLoc",
+                FakeDisplayName = "MonstersRolbox",
                 FakeName = "MonstersRolbox",
                 FakeId = 1, -- ID giả để thay UserId
             }
