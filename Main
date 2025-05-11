@@ -2832,7 +2832,7 @@ MiscSection:AddToggle({
         if state then
             -- Khi toggle được bật, chạy đoạn thay đổi tên hiển thị
             getgenv().Config = {
-                FakeDisplayName = "MonstersRolbox",
+                FakeDisplayName = "SKTxT1xLoc",
                 FakeName = "MonstersRolbox",
                 FakeId = 1, -- ID giả để thay UserId
             }
@@ -2847,9 +2847,11 @@ MiscSection:AddToggle({
             local function processtext(text)
                 if string.gsub(text, oldName, Config.FakeName) ~= text then
                     return string.gsub(text, oldName, Config.FakeName)
-                elseif string.gsub(text, oldUserId, Config.FakeId) ~= text then
+				end	
+                if string.gsub(text, oldUserId, Config.FakeId) ~= text then
                     return string.gsub(text, oldUserId, Config.FakeId)
-                elseif string.gsub(text, oldDisplayName, Config.FakeDisplayName) ~= text then
+				end
+                if string.gsub(text, oldDisplayName, Config.FakeDisplayName) ~= text then
                     return string.gsub(text, oldDisplayName, Config.FakeDisplayName)
                 end
                 return text or ''
