@@ -1872,7 +1872,7 @@ task.spawn(function()
                     if (not debounce) and ((not game.Players.LocalPlayer:FindFirstChild("combotangasd123")) or game.Players.LocalPlayer:FindFirstChild("combotangasd123") and game.Players.LocalPlayer:FindFirstChild("combotangasd123").Value < 1) then 
                     debounce = true 
                     attack(attackMethods[Method])
-                    task.wait(3)
+                    task.wait(1.8)
                     debounce = false
                 end
             end
