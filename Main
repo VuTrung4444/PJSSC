@@ -1404,6 +1404,26 @@ MiscSection:AddToggle({
     end
 })
 
+MiscSection:AddToggle({ 
+    Name = "Change Koketsu Arrow CoolDown",
+    Flag = "ChangeKoketsuArrowCoolDown",
+    Keybind = false,
+    Callback = function(v)
+        if v then
+            -- Đặt CoolDown của Koketsu Arrow thành 6 khi toggle được bật
+            local skills = game:GetService("Players").LocalPlayer.PlayerGui:WaitForChild("Power_Adder"):WaitForChild("Arrow"):WaitForChild("Skills")
+            local koketsuArrow = skills:WaitForChild("Koketsu Arrow")
+            local cooldown = koketsuArrow:FindFirstChild("CoolDown")
+
+            if cooldown and cooldown:IsA("ValueBase") then
+                cooldown.Value = 6
+            end
+        end
+    end
+})
+
+
+
 MiscSection:AddToggle({
     Name = "Auto Med",
     Flag = "AutoMed",
@@ -2888,6 +2908,8 @@ spawn(function()
         end
     end
 end)
+
+
 
 MiscSection:AddToggle({
     Name = "Fake Name/DisplayName",
