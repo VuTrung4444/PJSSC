@@ -1200,7 +1200,8 @@ SpeedAndJump:AddSlider({
     end
 })
 
---GodModeState--
+
+-- God Mode variables
 local UIS = game:GetService("UserInputService")
 
 local godModeToggle = GodModeQuick:AddToggle({
@@ -1217,7 +1218,7 @@ local function toggleGodMode(state)
     godModeState = state
     ENG = state
 
-    -- Cập nhật giao diện của toggle
+    -- Update toggle state
     if godModeToggle.Callback then
         task.spawn(function()
             godModeToggle.Callback(state)
@@ -1232,7 +1233,6 @@ local godModeButton = GodModeQuick:AddButton({
     end
 })
 
-
 UIS.InputBegan:Connect(function(input, gameProcessed)
     if not gameProcessed and input.KeyCode == Enum.KeyCode.R then
         toggleGodMode(not godModeState)
@@ -1245,15 +1245,12 @@ for _, godMode in ipairs(GodModes) do
         Flag = "Gm_" .. godMode,
         Callback = function(state)
             if state then
-
                 if activeToggle and activeToggle ~= toggle then
                     activeToggle:SetState(false)
                 end
-
                 activeToggle = toggle
                 getgenv().GodSelected = godMode
             else
-
                 if activeToggle == toggle then
                     activeToggle = nil
                     getgenv().GodSelected = nil
@@ -1261,9 +1258,52 @@ for _, godMode in ipairs(GodModes) do
             end
         end
     })
-
     toggles[godMode] = toggle
 end
+
+-- Inf iFrames
+spawn(function()
+    while task.wait() do
+        if ENG then
+            local args = {
+                [1] = "skil_ting_asd",
+                [2] = game:GetService("Players").LocalPlayer,
+                [3] = getgenv().GodSelected,
+                [4] = 1
+            }
+            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("To_Server"):WaitForChild("Handle_Initiate_S"):FireServer(unpack(args))
+            task.wait(0.5)
+        end
+    end
+end)
+
+-- Koketsu Arrow Detection (with animation check only)
+local function monitorKoketsuArrow()
+    -- Kiểm tra khi nhân vật đang sử dụng Koketsu Arrow
+    local player = game.Players.LocalPlayer
+    local character = player.Character
+    if character and character:FindFirstChild("HumanoidRootPart") then
+        -- Kiểm tra khi animation của Koketsu Arrow bắt đầu
+        local humanoid = character:FindFirstChild("Humanoid")
+        if humanoid then
+            humanoid.AnimationPlayed:Connect(function(animation)
+                if animation.Name == "Koketsu_Arrow_actual_anim" then
+                    print("Animation Koketsu Arrow bắt đầu.")
+                    
+                    -- Tắt God Mode khi Koketsu Arrow được sử dụng
+                    if godModeState then
+						task.wait(0.25)
+                        toggleGodMode(false)
+                    end
+                end
+            end)
+        end
+    end
+end
+
+-- Gọi hàm để giám sát khi kĩ năng được sử dụng
+monitorKoketsuArrow()
+
 
 
 MiscSection:AddToggle({
@@ -1832,24 +1872,6 @@ task.spawn(function()
     end
 end)
 
-
-
---// Inf iFrames \\--
-spawn(function()
-    while task.wait() do
-        if ENG then
-            local args = {
-                [1] = "skil_ting_asd",
-                [2] = game:GetService("Players").LocalPlayer,
-                [3] = getgenv().GodSelected,
-                [4] = 1
-            }
-            
-            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("To_Server"):WaitForChild("Handle_Initiate_S"):FireServer(unpack(args))
-            task.wait(0.5)
-        end
-    end
-end)
 
 --// Damage Log Spoofer \\--
 spawn(function()
