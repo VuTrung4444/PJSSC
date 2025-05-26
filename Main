@@ -1836,7 +1836,7 @@ spawn(function()
                             for i, c in pairs(v.Drops:GetChildren()) do
                                 if v:FindFirstChild("Add_To_Inventory") then
                                     v["Add_To_Inventory"]:InvokeServer(c.Name)
-                                    delay(0.5, function()
+                                    delay(1, function()
                                         if c then
                                             c:Destroy()
                                         end
