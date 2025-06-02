@@ -1985,7 +1985,7 @@ function startArrow275Loop()
                 end
 
                 while not modelCFrame and getgenv().Arrow do
-                    task.wait(0.1)
+                    task.wait(0.5)
                     if v and v.GetModelCFrame and type(v.GetModelCFrame) == "function" then
                         modelCFrame = v:GetModelCFrame()
                     end
@@ -2005,7 +2005,7 @@ function startArrow275Loop()
                         200,
                         200
                     )
-					task.wait(0.3)
+					task.wait(0.5)
                 end
             end
         end
@@ -2074,7 +2074,7 @@ function arrowNoLagAttackLoop()
                 if not v or not v.Parent or (v:FindFirstChildOfClass("Humanoid") and v:FindFirstChildOfClass("Humanoid").Health <= 0) then
                     repeat
                         v = getclosestSkills(parentFolder)
-                        task.wait(0.3) 
+                        task.wait(0.5) 
                     until v or not getgenv().AllArrow
                 end
 
@@ -2092,7 +2092,7 @@ function arrowNoLagAttackLoop()
                                 200,
                                 200
                             )
-							task.wait(0.3) 
+							task.wait(0.5) 
                         end
                     end
                 end
