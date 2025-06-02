@@ -2250,7 +2250,7 @@ local function startFarmLoop()
                     end
                     break
                 end
-            until not getgenv().Farm or GetDistance(bossCFrame) < 20
+            until not getgenv().Farm or GetDistance(bossCFrame) < 10
 
             if not getgenv().Farm then break end
             if TweenFa then
@@ -2272,7 +2272,7 @@ local function startFarmLoop()
                     if bossEntity.PrimaryPart then -- Kiểm tra tránh nil trước khi dùng
                         local entityCFrame = CFrame.new(bossEntity.PrimaryPart.Position) * FarmModes
                         
-                        if GetDistance(entityCFrame) >= 25 and GetDistance(entityCFrame) < 150 then
+                        if GetDistance(entityCFrame) >= 15 and GetDistance(entityCFrame) < 150 then
                             game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = entityCFrame
                         else
                             if not TweenFa then
