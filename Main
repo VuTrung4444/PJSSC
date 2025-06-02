@@ -136,8 +136,8 @@ if game.PlaceId == mainMenuPlaceID then
         if state then
             -- Khi toggle được bật, chạy đoạn thay đổi tên hiển thị
             getgenv().Config = {
-                FakeDisplayName = "SKTxT1xChaTkLoc",
-                FakeName = "SKTxT1xChaTkLoc",
+                FakeDisplayName = "SKTxT1xLoc",
+                FakeName = "acquysaulan",
                 FakeId = 1, -- ID giả để thay UserId
             }
 
@@ -1836,7 +1836,7 @@ spawn(function()
                             for i, c in pairs(v.Drops:GetChildren()) do
                                 if v:FindFirstChild("Add_To_Inventory") then
                                     v["Add_To_Inventory"]:InvokeServer(c.Name)
-                                    delay(2, function()
+                                    delay(1, function()
                                         if c then
                                             c:Destroy()
                                         end
@@ -1847,6 +1847,9 @@ spawn(function()
                     end
                 end
             end)
+            if not success then
+                warn("AutoCollectChest error: ", err)
+            end
         end
     end
 end)
@@ -1985,7 +1988,7 @@ function startArrow275Loop()
                 end
 
                 while not modelCFrame and getgenv().Arrow do
-                    task.wait(0.5)
+                    task.wait(0.1)
                     if v and v.GetModelCFrame and type(v.GetModelCFrame) == "function" then
                         modelCFrame = v:GetModelCFrame()
                     end
@@ -2005,7 +2008,7 @@ function startArrow275Loop()
                         200,
                         200
                     )
-					task.wait(0.5)
+					task.wait(0.3)
                 end
             end
         end
@@ -2074,7 +2077,7 @@ function arrowNoLagAttackLoop()
                 if not v or not v.Parent or (v:FindFirstChildOfClass("Humanoid") and v:FindFirstChildOfClass("Humanoid").Health <= 0) then
                     repeat
                         v = getclosestSkills(parentFolder)
-                        task.wait(0.5) 
+                        task.wait(0.3) 
                     until v or not getgenv().AllArrow
                 end
 
@@ -2092,7 +2095,7 @@ function arrowNoLagAttackLoop()
                                 200,
                                 200
                             )
-							task.wait(0.5) 
+							task.wait(0.3) 
                         end
                     end
                 end
@@ -2250,7 +2253,7 @@ local function startFarmLoop()
                     end
                     break
                 end
-            until not getgenv().Farm or GetDistance(bossCFrame) < 10
+            until not getgenv().Farm or GetDistance(bossCFrame) < 20
 
             if not getgenv().Farm then break end
             if TweenFa then
@@ -2272,7 +2275,7 @@ local function startFarmLoop()
                     if bossEntity.PrimaryPart then -- Kiểm tra tránh nil trước khi dùng
                         local entityCFrame = CFrame.new(bossEntity.PrimaryPart.Position) * FarmModes
                         
-                        if GetDistance(entityCFrame) >= 15 and GetDistance(entityCFrame) < 150 then
+                        if GetDistance(entityCFrame) >= 25 and GetDistance(entityCFrame) < 150 then
                             game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = entityCFrame
                         else
                             if not TweenFa then
@@ -2937,8 +2940,8 @@ MiscSection:AddToggle({
         if state then
             -- Khi toggle được bật, chạy đoạn thay đổi tên hiển thị
             getgenv().Config = {
-                FakeDisplayName = "SKTxT1xChaTkLoc",
-                FakeName = "SKTxT1xChaTkLoc",
+                FakeDisplayName = "SKTxT1xLoc",
+                FakeName = "acquysaulan",
                 FakeId = 1, -- ID giả để thay UserId
             }
 
