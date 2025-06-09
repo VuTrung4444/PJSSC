@@ -906,7 +906,7 @@ Settings:AddSlider({
     Name = "Tween Speed",
     Flag = "TweenSlider",
     Value = 200,
-    Min = 150,
+    Min = 100,
     Max = 500,
     Textbox = true,
     Callback = function(Value)
