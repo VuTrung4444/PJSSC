@@ -1584,7 +1584,7 @@ Ect:AddToggle({
     Flag = "AutoMugen",
     Callback = function(State)
         task.spawn(function()
-            if placeId == 13883059853 or 17387482786 then
+            if placeId == 13883059853 or placeId == 17387482786 then
 while State and IsOpen() do
     local clock2 = workspace:FindFirstChild("MugenTrain") and workspace.MugenTrain:FindFirstChild("Clock2")
     if clock2 and clock2:FindFirstChild("Hours") and clock2:FindFirstChild("Minutes") then
@@ -1814,9 +1814,9 @@ function UpdateActiveBossLocations()
 
 end
 
-if placeId == 13883279773 or 17387475546 then
+if placeId == 13883279773 or placeId == 17387475546 then
     mapName = "Map1"
-elseif placeId == 13883059853 or 17387482786 then
+elseif placeId == 13883059853 or placeId == 17387482786 then
     mapName = "Map2"
 end
 
