@@ -1292,7 +1292,7 @@ local function monitorKoketsuArrow()
                     
                     -- Tắt God Mode khi Koketsu Arrow được sử dụng
                     if godModeState then
-						task.wait(0.59)
+						task.wait(0.595)
                         toggleGodMode(false)
                     end
                 end
