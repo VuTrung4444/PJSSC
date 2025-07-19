@@ -1223,7 +1223,7 @@ local function toggleGodMode(state)
             godModeToggle.Callback(state)
         end)
     end
-end
+end})
 
 for _, godMode in ipairs(GodModes) do
     local toggle = GodModeQuick:AddToggle({
