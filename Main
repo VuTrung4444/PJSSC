@@ -1225,6 +1225,28 @@ local function toggleGodMode(state)
     end
 end
 
+for _, godMode in ipairs(GodModes) do
+    local toggle = GodModeQuick:AddToggle({
+        Name = godMode,
+        Flag = "Gm_" .. godMode,
+        Callback = function(state)
+            if state then
+                if activeToggle and activeToggle ~= toggle then
+                    activeToggle:SetState(false)
+                end
+                activeToggle = toggle
+                getgenv().GodSelected = godMode
+            else
+                if activeToggle == toggle then
+                    activeToggle = nil
+                    getgenv().GodSelected = nil
+                end
+            end
+        end
+    })
+    toggles[godMode] = toggle
+end
+
 -- Inf iFrames
 spawn(function()
     while task.wait() do
