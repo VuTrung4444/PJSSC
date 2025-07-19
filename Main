@@ -1202,11 +1202,12 @@ SpeedAndJump:AddSlider({
 
 
 -- God Mode variables
+local UIS = game:GetService("UserInputService")
 
 local godModeToggle = GodModeQuick:AddToggle({
     Name = "Enable God Mode",
     Flag = "ENG_Toggle",
-    keybind = "", 
+    keybind = "R", 
     Callback = function(v)
         godModeState = v
         ENG = v
@@ -1223,7 +1224,20 @@ local function toggleGodMode(state)
             godModeToggle.Callback(state)
         end)
     end
-end})
+end
+
+local godModeButton = GodModeQuick:AddButton({
+    Name = "Enable God Mode",
+    Callback = function()
+        toggleGodMode(not godModeState) 
+    end
+})
+
+UIS.InputBegan:Connect(function(input, gameProcessed)
+    if not gameProcessed and input.KeyCode == Enum.KeyCode.R then
+        toggleGodMode(not godModeState)
+    end
+end)
 
 for _, godMode in ipairs(GodModes) do
     local toggle = GodModeQuick:AddToggle({
