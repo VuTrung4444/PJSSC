@@ -2930,7 +2930,7 @@ MiscSection:AddToggle({
             -- Khi toggle được bật, chạy đoạn thay đổi tên hiển thị
             getgenv().Config = {
                 FakeDisplayName = "SKTxT1xLoc",
-                FakeName = "acquysaulan",
+                FakeName = "hikarunokaze",
                 FakeId = 1, -- ID giả để thay UserId
             }
 
