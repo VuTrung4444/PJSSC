@@ -1295,18 +1295,7 @@ monitorKoketsuArrow()
 
 
 
-MiscSection:AddToggle({
-    Name = "War Drums",
-    Value = false, 
-    Flag = "WarDrums",
-    Callback = function(State)
-        TLROAPSMG = State 
-        while TLROAPSMG and IsOpen() do 
-            DrumRemote:FireServer(true)
-            task.wait(7.5)
-        end     
-    end 
-})
+
 
 MiscSection:AddToggle({
     Name = "No Fog",
@@ -1342,6 +1331,41 @@ MiscSection:AddToggle({
                 getgenv().DisableDamageTextConnection = nil
             end
         end
+    end
+})
+
+MiscSection:AddToggle({
+    Name = "War Drums",
+    Value = false, 
+    Flag = "WarDrums",
+    Callback = function(State)
+        TLROAPSMG = State 
+        while TLROAPSMG and IsOpen() do 
+            DrumRemote:FireServer(true)
+            task.wait(7.5)
+        end     
+    end 
+})
+
+MiscSection:AddToggle({
+    Name = "No Sun Dmg",
+    Flag = "NS",
+    Callback = function (v)
+        if game:GetService("Players").LocalPlayer.PlayerScripts.Small_Scripts.Gameplay:FindFirstChild("Sun_Damage") then
+            if v == true then
+                    game:GetService("Players").LocalPlayer.PlayerScripts.Small_Scripts.Gameplay.Sun_Damage.Disabled = true                
+                end
+            end
+    end
+})
+
+
+MiscSection:AddToggle({
+    Name = "Boss Damage Log Spoof",
+    Flag = "BDLS",
+    Keybind = false,
+    Callback = function (v)
+        getgenv().hide_userdmg = v
     end
 })
 
@@ -1407,29 +1431,6 @@ MiscSection:AddToggle({
         else
             game:GetService("ReplicatedStorage").Remotes.thundertang123:FireServer(false)
         end
-    end
-})
-
-
-MiscSection:AddToggle({
-    Name = "No Sun Dmg",
-    Flag = "NS",
-    Callback = function (v)
-        if game:GetService("Players").LocalPlayer.PlayerScripts.Small_Scripts.Gameplay:FindFirstChild("Sun_Damage") then
-            if v == true then
-                    game:GetService("Players").LocalPlayer.PlayerScripts.Small_Scripts.Gameplay.Sun_Damage.Disabled = true                
-                end
-            end
-    end
-})
-
-
-MiscSection:AddToggle({
-    Name = "Boss Damage Log Spoof",
-    Flag = "BDLS",
-    Keybind = false,
-    Callback = function (v)
-        getgenv().hide_userdmg = v
     end
 })
 
