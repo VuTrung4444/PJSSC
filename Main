@@ -2921,17 +2921,15 @@ spawn(function()
     end
 end)
 
-
-
 MiscSection:AddToggle({
     Name = "Fake Name/DisplayName",
     Default = false,
     Callback = function(state)
         if state then
-            -- Khi toggle được bật, chạy đoạn thay đổi tên hiển thị
+
             getgenv().Config = {
-                FakeDisplayName = "SKTxT1xLoc",
-                FakeName = "hikarunokaze",
+					FakeDisplayName = "SKTxT1xLoc",
+					FakeName = "hikarunokaze",
                 FakeId = 1, -- ID giả để thay UserId
             }
 
@@ -2982,6 +2980,88 @@ MiscSection:AddToggle({
             end)
 
             lp.DisplayName = Config.FakeDisplayName
+        end
+    end
+})
+
+MiscSection:AddToggle({
+    Name = "Fake Other Name/DisplayName",
+    Default = false,
+    Callback = function(state)
+        if state then
+            -- Cấu hình tên giả
+            getgenv().Config = {
+                TargetUsername = "2k9thiSinh10diem", -- ✅ Thay tên thật tại đây
+                FakeDisplayName = "SKTxT1xLoc",
+                FakeName = "hikarunokaze",
+                FakeId = 1, -- ID giả để thay UserId
+            }
+
+            local players = game:GetService('Players')
+
+            -- 🔍 Tìm người chơi theo tên
+            local targetPlayer = nil
+            for _, player in pairs(players:GetPlayers()) do
+                if player.Name == Config.TargetUsername then
+                    targetPlayer = player
+                    break
+                end
+            end
+
+            if not targetPlayer then
+                warn("Không tìm thấy người chơi với username:", Config.TargetUsername)
+                return
+            end
+
+            local lp = targetPlayer
+
+
+            local oldUserId = tostring(lp.UserId)
+            local oldName = lp.Name
+            local oldDisplayName = lp.DisplayName
+
+            local function processtext(text)
+                if string.gsub(text, oldName, Config.FakeName) ~= text then
+                    return string.gsub(text, oldName, Config.FakeName)
+                end	
+                if string.gsub(text, oldUserId, Config.FakeId) ~= text then
+                    return string.gsub(text, oldUserId, Config.FakeId)
+                end
+                if string.gsub(text, oldDisplayName, Config.FakeDisplayName) ~= text then
+                    return string.gsub(text, oldDisplayName, Config.FakeDisplayName)
+                end
+                return text or ''
+            end
+
+
+            for _, v in next, game:GetDescendants() do
+                if v:IsA("TextBox") or v:IsA("TextLabel") or v:IsA("TextButton") then
+                    v.Text = processtext(v.Text)
+                    v.Name = processtext(v.Name)
+                    v.Changed:Connect(function(property)
+                        if property == "Text" or property == "Name" then
+                            v.Text = processtext(v.Text)
+                            v.Name = processtext(v.Name)
+                        end
+                    end)
+                end
+            end
+
+
+            game.DescendantAdded:Connect(function(descendant)
+                if descendant:IsA("TextBox") or descendant:IsA("TextLabel") or descendant:IsA("TextButton") then
+                    descendant.Text = processtext(descendant.Text)
+                    descendant.Name = processtext(descendant.Name)
+                    descendant.Changed:Connect(function(property)
+                        if property == "Text" or property == "Name" then
+                            descendant.Text = processtext(descendant.Text)
+                            descendant.Name = processtext(descendant.Name)
+                        end
+                    end)
+                end
+            end)
+
+			lp.DisplayName = Config.FakeDisplayName
         end
     end
 })
