@@ -3342,7 +3342,7 @@ Gourd:AddToggle({
 
 			local attempts = 0
 			while attempts < 3 do
-				local tween, duration = TweenToPosition(position, 200)
+				local tween, duration = TweenToPosition(position, 150)
 				if not tween then return false end
 
 				local start = tick()
