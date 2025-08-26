@@ -1440,19 +1440,92 @@ MiscSection:AddToggle({
 })
 
 
+local autoMuzanEnabled = false
+local autoMuzanLoop = nil
+local questConnectionAdd = nil
+local questConnectionRemove = nil
 
 MiscSection:AddToggle({
-    Name = "Thunder Mode [Human]",
-    Flag = "Thunder",
-    Keybind = false,
-    Callback = function (v)
-        if v then
-            game:GetService("ReplicatedStorage").Remotes.thundertang123:FireServer(true)
-        else
-            game:GetService("ReplicatedStorage").Remotes.thundertang123:FireServer(false)
-        end
-    end
+	Name = "Auto Nhận Nhiệm Vụ Muzan",
+	Default = false,
+	Callback = function(state)
+		autoMuzanEnabled = state
+
+		if state then
+
+			task.spawn(function()
+
+				local ReplicatedStorage = game:GetService("ReplicatedStorage")
+				local Players = game:GetService("Players")
+
+				local player = Players.LocalPlayer
+				local playerName = player.Name
+
+
+				local validQuests = {
+					["Eliminate Inosuke"] = true,
+					["Eliminate Rengoku"] = true,
+					["Eliminate Tengen"] = true,
+					["Eliminate Snow Trainee"] = true,
+					["Eliminate Renpeke"] = true,
+					["Eliminate Muichiro Tokito"] = true
+				}
+
+
+				local questFolder = ReplicatedStorage:WaitForChild("Muzan_Quests"):WaitForChild(playerName)
+				local remote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("To_Server"):WaitForChild("muzan_quest_ting")
+
+				local currentQuest = nil
+
+
+				local function claimQuest(questName)
+					remote:FireServer(questName, "Do")
+					currentQuest = questName
+				end
+
+				local function checkForNewQuest()
+					if not autoMuzanEnabled then return end
+					for _, quest in ipairs(questFolder:GetChildren()) do
+						if validQuests[quest.Name] and currentQuest ~= quest.Name then
+							claimQuest(quest.Name)
+							break
+						end
+					end
+				end
+
+
+				questConnectionAdd = questFolder.ChildAdded:Connect(function(child)
+					if autoMuzanEnabled and validQuests[child.Name] and currentQuest ~= child.Name then
+						claimQuest(child.Name)
+					end
+				end)
+
+
+				questConnectionRemove = questFolder.ChildRemoved:Connect(function(child)
+					if autoMuzanEnabled and child.Name == currentQuest then
+						currentQuest = nil
+						task.wait(1)
+						checkForNewQuest()
+					end
+				end)
+
+
+				checkForNewQuest()
+
+
+				while autoMuzanEnabled do
+					task.wait(180)
+					checkForNewQuest()
+				end
+			end)
+		else
+
+			if questConnectionAdd then questConnectionAdd:Disconnect() end
+			if questConnectionRemove then questConnectionRemove:Disconnect() end
+		end
+	end
 })
+
 
 MiscSection:AddToggle({ 
     Name = "Change Koketsu Arrow CoolDown",
@@ -1804,25 +1877,20 @@ function UpdateLists()
         end
     })
 
-
-
-    -- Gọi UpdateActiveBossLocations để cập nhật danh sách boss hiện tại
     UpdateActiveBossLocations()
 end
 
-function UpdateActiveBossLocations()
-    ActiveBossLocations = {}
-
-    -- Kiểm tra map hiện tại và cập nhật danh sách boss
-    if SelectedMap == "Map1" then
-        ActiveBossLocations = BossLocationsMap1
-    elseif SelectedMap == "Map2" then
-        ActiveBossLocations = BossLocationsMap2
-    else
-        return
-    end
-
+function UpdateActiveBossLocations() 
+	ActiveBossLocations = {}  
+	if SelectedMap == "Map1" then 
+		ActiveBossLocations = BossLocationsMap1 
+	elseif SelectedMap == "Map2" then 
+		ActiveBossLocations = BossLocationsMap2 
+	else 
+		return 
+	end 
 end
+
 
 if placeId == 13883279773 or placeId == 17387475546 then
     mapName = "Map1"
@@ -3086,292 +3154,295 @@ MiscSection:AddToggle({
     end
 })
 
+if game.PlaceId == 13883279773 or game.PlaceId == 17387475546 then
+	--Nhặt Hoa--
+	spawn(function()
+		while true do
+			wait(naturalWaitTime()) 
+			if Players.LocalPlayer and Players.LocalPlayer.Character then
+				VirtualUser:CaptureController()
+				VirtualUser:ClickButton2(Vector2.new(math.random(100, 1820), math.random(100, 980))) 
+			end
+		end
+	end)
 
---Nhặt Hoa--
-spawn(function()
-    while true do
-        wait(naturalWaitTime()) 
-        if Players.LocalPlayer and Players.LocalPlayer.Character then
-            VirtualUser:CaptureController()
-            VirtualUser:ClickButton2(Vector2.new(math.random(100, 1820), math.random(100, 980))) 
-        end
-    end
-end)
+	local TweenService = game:GetService("TweenService")
+	local flowers = game:GetService("Workspace"):WaitForChild("Demon_Flowers_Spawn")
+	local Player = game.Players.LocalPlayer
 
-local TweenService = game:GetService("TweenService")
-local flowers = game:GetService("Workspace"):WaitForChild("Demon_Flowers_Spawn")
-local Player = game.Players.LocalPlayer
+	local AutoCollectLilys = false
+	local failedFlowers = {}
+	local collectingThread = nil
 
-local AutoCollectLilys = false
-local failedFlowers = {}
-local collectingThread = nil
+	local function isCharacterValid()
+		local character = Player.Character
+		return character and character.Parent and character:FindFirstChild("HumanoidRootPart")
+	end
 
-local function isCharacterValid()
-    local character = Player.Character
-    return character and character.Parent and character:FindFirstChild("HumanoidRootPart")
+	local function fireproximityprompt(prompt)
+		if prompt then
+			prompt.HoldDuration = 0
+			prompt:InputHoldBegin()
+			task.wait(0.5)
+			prompt:InputHoldEnd()
+		end
+	end
+
+	local function TweenToPosition(pos, speed)
+		local hrp = Player.Character and Player.Character:FindFirstChild("HumanoidRootPart")
+		if not hrp then return nil, 0 end
+
+		-- Kiểm tra vị trí hợp lệ trước khi tạo Tween
+		if not pos or pos.Y < -500 or pos.Magnitude > 10000 then
+			return nil, 0
+		end
+
+		local distance = (hrp.Position - pos).Magnitude
+		local tweenInfo = TweenInfo.new(distance / speed, Enum.EasingStyle.Linear)
+
+		-- Hủy Tween cũ trước khi tạo mới
+		if getgenv().currentTween then
+			getgenv().currentTween:Cancel()
+		end
+
+		local tween = TweenService:Create(hrp, tweenInfo, {CFrame = CFrame.new(pos)})
+		getgenv().currentTween = tween
+
+		tween:Play()
+		return tween, distance / speed
+	end
+
+	local function getFlowerPosition(flower)
+		if not flower or not flower.Parent then return nil end
+		local success, pos = pcall(function() return flower:GetPivot().Position end)
+
+		-- Kiểm tra xem pos có hợp lệ không trước khi trả về
+		if success and pos and pos.Y > -500 and pos.Magnitude < 10000 then
+			return pos
+		end
+		return nil
+	end
+
+	local function getNearestFlower()
+		local hrp = Player.Character and Player.Character:FindFirstChild("HumanoidRootPart")
+		if not hrp then return nil end
+
+		local nearest, minDist = nil, math.huge
+		for _, flower in pairs(flowers:GetChildren()) do
+			if flower:IsA("Model") and flower.Parent and (not failedFlowers[flower] or tick() - failedFlowers[flower] > 30) then
+				local pos = getFlowerPosition(flower)
+				if pos then
+					local dist = (hrp.Position - pos).Magnitude
+					if dist < minDist then
+						nearest, minDist = flower, dist
+					end
+				end
+			end
+		end
+		return nearest
+	end
+
+	local function safeMoveToFlower(flower)
+		if not flower or not flower.Parent then return false end
+
+		local position = getFlowerPosition(flower)
+		if not position then return false end
+
+		local attempts = 0
+		while attempts < 3 do
+			local tween, duration = TweenToPosition(position, 200)
+			if not tween then return false end
+
+			local start = tick()
+			while tick() - start < duration + 1 do
+				task.wait()
+
+				if not isCharacterValid() or not flower.Parent or not AutoCollectLilys then
+					tween:Cancel()
+					return false
+				end
+
+				if tween.PlaybackState ~= Enum.PlaybackState.Playing then 
+					break 
+				end
+			end
+
+			tween:Cancel()
+			
+			-- Reset vận tốc để tránh bay ra ngoài map
+			if isCharacterValid() then
+				local hrp = Player.Character:FindFirstChild("HumanoidRootPart")
+				if hrp then
+					hrp.Velocity, hrp.AssemblyLinearVelocity = Vector3.zero, Vector3.zero
+				end
+			end
+
+			if isCharacterValid() then
+				return true
+			end
+
+			attempts = attempts + 1
+			task.wait(0.2)
+		end
+
+		return false
+	end
+
+	local function tryCollectFlower(flower)
+		if not flower or not flower:IsA("Model") or not flower.Parent then 
+			return false
+		end
+
+		local prompt = nil
+		for _, obj in ipairs(flower:GetDescendants()) do
+			if obj:IsA("ProximityPrompt") then
+				prompt = obj
+				break
+			end
+		end
+
+		if not prompt then
+			return false
+		end
+
+		local hrp = Player.Character and Player.Character:FindFirstChild("HumanoidRootPart")
+		if not hrp then return false end
+
+		local position = getFlowerPosition(flower)
+		if not position or (hrp.Position - position).Magnitude > 5 then
+			return false
+		end
+
+		prompt.HoldDuration = 0
+		prompt.MaxActivationDistance = 10
+		
+		task.wait(0.5)
+		for i = 1, 3 do
+			fireproximityprompt(prompt)
+			task.wait(0.3)
+			if not flower.Parent then 
+				return true 
+			end
+		end
+
+		task.wait(0.5)
+		if not flower.Parent then
+			return true
+		end
+
+		return false
+	end
+
+	local function startCollecting()
+		if collectingThread then return end
+
+		AutoCollectLilys = true
+
+		collectingThread = task.spawn(function()
+			while AutoCollectLilys do
+				if not isCharacterValid() then repeat task.wait(1) until isCharacterValid() end
+
+				for flower, lastFail in pairs(failedFlowers) do
+					if not flower.Parent or tick() - lastFail > 30 then
+						failedFlowers[flower] = nil
+					end
+				end
+
+				local flower = getNearestFlower()
+				if not flower then
+					task.wait(0.2)
+					continue
+				end
+
+				if safeMoveToFlower(flower) and tryCollectFlower(flower) then
+					failedFlowers[flower] = nil
+				else
+					failedFlowers[flower] = tick()
+				end
+
+				task.wait(0.2)
+			end
+			collectingThread = nil
+		end)
+	end
+
+	local function stopCollecting()
+		AutoCollectLilys = false
+		if collectingThread then
+			task.cancel(collectingThread)
+			collectingThread = nil
+		end
+
+		-- Hủy Tween hiện tại để tránh lỗi
+		if getgenv().currentTween then
+			getgenv().currentTween:Cancel()
+			getgenv().currentTween = nil
+		end
+
+		local hrp = Player.Character and Player.Character:FindFirstChild("HumanoidRootPart")
+
+		if hrp then
+			hrp.Velocity, hrp.AssemblyLinearVelocity = Vector3.zero, Vector3.zero
+			-- Reset vị trí nếu bị bay ra ngoài map
+			if hrp.Position.Y < -500 then
+				hrp.CFrame = CFrame.new(workspace.SpawnLocation.Position + Vector3.new(0, 5, 0))
+			end
+		end
+	end
+
+	MiscSection:AddToggle({
+		Name = "Auto Collect Lilys",
+		Flag = "CollectAllLilys",
+		Keybind = false,
+		Callback = function(v)
+			if v then startCollecting() else stopCollecting() end
+		end
+	})
 end
 
-local function fireproximityprompt(prompt)
-    if prompt then
-        prompt.HoldDuration = 0
-        prompt:InputHoldBegin()
-        task.wait(0.5)
-        prompt:InputHoldEnd()
-    end
+if game.PlaceId == 13883279773 or game.PlaceId == 17387475546 then
+	--FindMuzan--
+	local TweenService = game:GetService("TweenService")
+	local TweenSpeed = 250 -- Điều chỉnh tốc độ teleport
+
+	local function teleportToMuzan()
+		task.spawn(function()
+			local players = game:GetService("Players")
+			local localPlayer = players.LocalPlayer
+			local character = localPlayer.Character or localPlayer.CharacterAdded:Wait()
+			local hrp = character:WaitForChild("HumanoidRootPart")
+
+			local function getMuzanSpawnPos()
+				local muzan = workspace:FindFirstChild("Muzan")
+				if muzan and muzan:FindFirstChild("SpawnPos") then
+					return muzan.SpawnPos.Value
+				end
+				return nil
+			end
+
+			local muzanPos = getMuzanSpawnPos()
+			if muzanPos then
+				local offset = Vector3.new(10, 5, 0)
+				local targetPos = muzanPos + offset
+
+				-- Tính khoảng cách và dùng TweenService để teleport mượt
+				local Magnitude = (hrp.Position - targetPos).Magnitude
+				if Magnitude then
+					local Cur = TweenService:Create(hrp, TweenInfo.new(Magnitude / TweenSpeed, Enum.EasingStyle.Linear), {CFrame = CFrame.new(targetPos)})
+					Cur:Play()
+					Cur.Completed:Wait() -- Đợi teleport hoàn tất trước khi tiếp tục
+				end
+			end
+		end)
+	end
+
+	MiscSection:AddToggle({
+		Name = "Auto Teleport to Muzan",
+		Flag = "AutoTPMuzan",
+		Callback = function(state)
+			if state then
+				teleportToMuzan()
+			end
+		end
+	})
 end
-
-local function TweenToPosition(pos, speed)
-    local hrp = Player.Character and Player.Character:FindFirstChild("HumanoidRootPart")
-    if not hrp then return nil, 0 end
-
-    -- Kiểm tra vị trí hợp lệ trước khi tạo Tween
-    if not pos or pos.Y < -500 or pos.Magnitude > 10000 then
-        return nil, 0
-    end
-
-    local distance = (hrp.Position - pos).Magnitude
-    local tweenInfo = TweenInfo.new(distance / speed, Enum.EasingStyle.Linear)
-
-    -- Hủy Tween cũ trước khi tạo mới
-    if getgenv().currentTween then
-        getgenv().currentTween:Cancel()
-    end
-
-    local tween = TweenService:Create(hrp, tweenInfo, {CFrame = CFrame.new(pos)})
-    getgenv().currentTween = tween
-
-    tween:Play()
-    return tween, distance / speed
-end
-
-local function getFlowerPosition(flower)
-    if not flower or not flower.Parent then return nil end
-    local success, pos = pcall(function() return flower:GetPivot().Position end)
-
-    -- Kiểm tra xem pos có hợp lệ không trước khi trả về
-    if success and pos and pos.Y > -500 and pos.Magnitude < 10000 then
-        return pos
-    end
-    return nil
-end
-
-local function getNearestFlower()
-    local hrp = Player.Character and Player.Character:FindFirstChild("HumanoidRootPart")
-    if not hrp then return nil end
-
-    local nearest, minDist = nil, math.huge
-    for _, flower in pairs(flowers:GetChildren()) do
-        if flower:IsA("Model") and flower.Parent and (not failedFlowers[flower] or tick() - failedFlowers[flower] > 30) then
-            local pos = getFlowerPosition(flower)
-            if pos then
-                local dist = (hrp.Position - pos).Magnitude
-                if dist < minDist then
-                    nearest, minDist = flower, dist
-                end
-            end
-        end
-    end
-    return nearest
-end
-
-local function safeMoveToFlower(flower)
-    if not flower or not flower.Parent then return false end
-
-    local position = getFlowerPosition(flower)
-    if not position then return false end
-
-    local attempts = 0
-    while attempts < 3 do
-        local tween, duration = TweenToPosition(position, 200)
-        if not tween then return false end
-
-        local start = tick()
-        while tick() - start < duration + 1 do
-            task.wait()
-
-            if not isCharacterValid() or not flower.Parent or not AutoCollectLilys then
-                tween:Cancel()
-                return false
-            end
-
-            if tween.PlaybackState ~= Enum.PlaybackState.Playing then 
-                break 
-            end
-        end
-
-        tween:Cancel()
-        
-        -- Reset vận tốc để tránh bay ra ngoài map
-        if isCharacterValid() then
-            local hrp = Player.Character:FindFirstChild("HumanoidRootPart")
-            if hrp then
-                hrp.Velocity, hrp.AssemblyLinearVelocity = Vector3.zero, Vector3.zero
-            end
-        end
-
-        if isCharacterValid() then
-            return true
-        end
-
-        attempts = attempts + 1
-        task.wait(0.2)
-    end
-
-    return false
-end
-
-local function tryCollectFlower(flower)
-    if not flower or not flower:IsA("Model") or not flower.Parent then 
-        return false
-    end
-
-    local prompt = nil
-    for _, obj in ipairs(flower:GetDescendants()) do
-        if obj:IsA("ProximityPrompt") then
-            prompt = obj
-            break
-        end
-    end
-
-    if not prompt then
-        return false
-    end
-
-    local hrp = Player.Character and Player.Character:FindFirstChild("HumanoidRootPart")
-    if not hrp then return false end
-
-    local position = getFlowerPosition(flower)
-    if not position or (hrp.Position - position).Magnitude > 5 then
-        return false
-    end
-
-    prompt.HoldDuration = 0
-    prompt.MaxActivationDistance = 10
-    
-    task.wait(0.5)
-    for i = 1, 3 do
-        fireproximityprompt(prompt)
-        task.wait(0.3)
-        if not flower.Parent then 
-            return true 
-        end
-    end
-
-    task.wait(0.5)
-    if not flower.Parent then
-        return true
-    end
-
-    return false
-end
-
-local function startCollecting()
-    if collectingThread then return end
-
-    AutoCollectLilys = true
-
-    collectingThread = task.spawn(function()
-        while AutoCollectLilys do
-            if not isCharacterValid() then repeat task.wait(1) until isCharacterValid() end
-
-            for flower, lastFail in pairs(failedFlowers) do
-                if not flower.Parent or tick() - lastFail > 30 then
-                    failedFlowers[flower] = nil
-                end
-            end
-
-            local flower = getNearestFlower()
-            if not flower then
-                task.wait(0.2)
-                continue
-            end
-
-            if safeMoveToFlower(flower) and tryCollectFlower(flower) then
-                failedFlowers[flower] = nil
-            else
-                failedFlowers[flower] = tick()
-            end
-
-            task.wait(0.2)
-        end
-        collectingThread = nil
-    end)
-end
-
-local function stopCollecting()
-    AutoCollectLilys = false
-    if collectingThread then
-        task.cancel(collectingThread)
-        collectingThread = nil
-    end
-
-    -- Hủy Tween hiện tại để tránh lỗi
-    if getgenv().currentTween then
-        getgenv().currentTween:Cancel()
-        getgenv().currentTween = nil
-    end
-
-    local hrp = Player.Character and Player.Character:FindFirstChild("HumanoidRootPart")
-
-    if hrp then
-        hrp.Velocity, hrp.AssemblyLinearVelocity = Vector3.zero, Vector3.zero
-        -- Reset vị trí nếu bị bay ra ngoài map
-        if hrp.Position.Y < -500 then
-            hrp.CFrame = CFrame.new(workspace.SpawnLocation.Position + Vector3.new(0, 5, 0))
-        end
-    end
-end
-
-MiscSection:AddToggle({
-    Name = "Auto Collect Lilys",
-    Flag = "CollectAllLilys",
-    Keybind = false,
-    Callback = function(v)
-        if v then startCollecting() else stopCollecting() end
-    end
-})
-
---FindMuzan--
-local TweenService = game:GetService("TweenService")
-local TweenSpeed = 250 -- Điều chỉnh tốc độ teleport
-
-local function teleportToMuzan()
-    task.spawn(function()
-        local players = game:GetService("Players")
-        local localPlayer = players.LocalPlayer
-        local character = localPlayer.Character or localPlayer.CharacterAdded:Wait()
-        local hrp = character:WaitForChild("HumanoidRootPart")
-
-        local function getMuzanSpawnPos()
-            local muzan = workspace:FindFirstChild("Muzan")
-            if muzan and muzan:FindFirstChild("SpawnPos") then
-                return muzan.SpawnPos.Value
-            end
-            return nil
-        end
-
-        local muzanPos = getMuzanSpawnPos()
-        if muzanPos then
-            local offset = Vector3.new(10, 5, 0)
-            local targetPos = muzanPos + offset
-
-            -- Tính khoảng cách và dùng TweenService để teleport mượt
-            local Magnitude = (hrp.Position - targetPos).Magnitude
-            if Magnitude then
-                local Cur = TweenService:Create(hrp, TweenInfo.new(Magnitude / TweenSpeed, Enum.EasingStyle.Linear), {CFrame = CFrame.new(targetPos)})
-                Cur:Play()
-                Cur.Completed:Wait() -- Đợi teleport hoàn tất trước khi tiếp tục
-            end
-        end
-    end)
-end
-
-MiscSection:AddToggle({
-    Name = "Auto Teleport to Muzan",
-    Flag = "AutoTPMuzan",
-    Callback = function(state)
-        if state then
-            teleportToMuzan()
-        end
-    end
-})
