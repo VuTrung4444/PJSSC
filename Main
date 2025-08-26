@@ -960,43 +960,33 @@ Teleports:AddButton({
     Name = "Skibidi To",
     Callback = function()
         local Player = game.Players.LocalPlayer
-        local Character = Player.Character or Player.CharacterAdded:Wait()
-        local HumanoidRootPart = Character:FindFirstChild("HumanoidRootPart")
-
-        if not HumanoidRootPart then
-            warn("⚠️ Lỗi: Không tìm thấy HumanoidRootPart!")
-            return
-        end
 
         -- Kiểm tra SelectedArea hợp lệ
         if not SelectedArea or SelectedArea == "" then
-            warn("⚠️ Lỗi: Chưa chọn khu vực để dịch chuyển!")
             return
         end
 
-        -- Xác định MapToUse dựa trên Map đã chọn
-        local MapToUse = {}
-        if SelectedMap == "Map1" then
-            MapToUse = Map1
-        elseif SelectedMap == "Map2" then
-            MapToUse = Map2
-        else
-            warn("⚠️ Lỗi: Chưa chọn Map hợp lệ!")
-            return
-        end
+        -- Tạo đường dẫn script GUI
+        local scriptPath = string.format("Players.%s.PlayerGui.Npc_Dialogue.Guis.ScreenGui.LocalScript", Player.Name)
 
-        -- Kiểm tra Place hợp lệ
-        local Place = MapToUse[SelectedArea]
-        if not Place then
-            warn("⚠️ Lỗi: Không tìm thấy tọa độ của khu vực [" .. SelectedArea .. "] trong Map [" .. SelectedMap .. "]!")
-            return
-        end
+        -- Giá trị thời gian giả định (bạn có thể dùng tick(), os.clock() hoặc giá trị bất kỳ)
+        local teleportTime = os.clock() * 1000 -- Hoặc tick() * 1000 để mô phỏng giá trị như ví dụ
 
-        -- Dịch chuyển tức thời
-        HumanoidRootPart.CFrame = Place * CFrame.new(0, 5, 0)
-        print("✅ Dịch chuyển thành công!")
+        -- Gửi request đến server
+        local args = {
+            scriptPath,
+            teleportTime,
+            SelectedArea
+        }
+
+        local success, result = pcall(function()
+            return game:GetService("ReplicatedStorage")
+                :WaitForChild("teleport_player_to_location_for_map_tang")
+                :InvokeServer(unpack(args))
+        end)
     end
 })
+
 
 
 -- Thiết lập mặc định nếu cần
@@ -1878,28 +1868,29 @@ Ect:AddButton({
 function UpdateLists()
     local LocationsToUse, BossesToUse = {}, {}
 
+    -- Gán danh sách và giá trị mặc định theo map
     if SelectedMap == "Map1" then
         LocationsToUse = Map1List
         BossesToUse = BossesMap1List
+        SelectedArea = "Kiribating Village"
     elseif SelectedMap == "Map2" then
         LocationsToUse = Map2List
         BossesToUse = BossesMap2List
+        SelectedArea = "Akeza Cave"
+    else
+        SelectedArea = nil
     end
 
-    -- Xóa Dropdown cũ nếu tồn tại
-    if LocationsDropdown then
-        LocationsDropdown:Remove()
-    end
-    if BossesDropdown then
-        BossesDropdown:Remove()
-    end
+    -- Xóa dropdown cũ nếu tồn tại
+    if LocationsDropdown then LocationsDropdown:Remove() end
+    if BossesDropdown then BossesDropdown:Remove() end
 
-    -- Tạo Dropdown mới với danh sách cập nhật
+    -- Tạo dropdown mới và gán giá trị mặc định
     LocationsDropdown = Teleports:AddDropdown({
         Name = "Locations",
-        Nothing = "Select Location...",
-        Flag = "LocationSelect",
         List = LocationsToUse,
+        Flag = "LocationSelect",
+        Selected = SelectedArea, 
         Callback = function(State)
             SelectedArea = State
         end
