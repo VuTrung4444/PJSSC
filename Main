@@ -1565,6 +1565,34 @@ MiscSection:AddToggle({
     end
 })
 
+MiscSection:AddToggle({
+    Name = "Auto Cup Game",
+    Flag = "AutoCupGame",
+    Keybind = false,
+    Callback = function(v)
+        getgenv().AutoCupGame = v
+    end
+})
+
+MiscSection:AddToggle({
+    Name = "Auto Push Up",
+    Flag = "AutoPushUp",
+    Keybind = false,
+    Callback = function(v)
+        getgenv().AutoPushUp = v
+    end
+})
+
+MiscSection:AddToggle({
+    Name = "Auto Aim",
+    Flag = "AutoAim",
+    Keybind = false,
+    Callback = function(v)
+        getgenv().AutoAim = v
+    end
+})
+
+
 AutoSkills:AddToggle({
     Name = "Auto Skill",
     Flag = "AutoSkillEnabled",
@@ -1979,6 +2007,37 @@ spawn(function()
         if getgenv().AutoSplit then
             pcall(function()
                 game:GetService("Players").LocalPlayer.PlayerGui.ExcessGuis["boulder_split_ui"].Holder.LocalScript.Value.Value = 10000
+            end)
+        end
+    end
+end)
+
+spawn(function()
+    while task.wait() do
+        if getgenv().AutoCupGame then
+            pcall(function()
+                game:GetService("Players").LocalPlayer.PlayerGui.ExcessGuis["cup_game_gui"].Holder.cup_game_script123.Value.Value = 100
+            end)
+        end
+    end
+end)
+
+spawn(function()
+    while task.wait() do
+        if getgenv().AutoPushUp then
+            pcall(function()
+                game:GetService("Players").LocalPlayer.PlayerGui.ExcessGuis["Push_Up_Gui"].Holder.push_up_mat_local_script.Value.Value = 100
+            end)
+        end
+    end
+end)
+
+
+spawn(function()
+    while task.wait() do
+        if getgenv().AutoAim then
+            pcall(function()
+                game:GetService("Players").LocalPlayer.PlayerGui.ExcessGuis["chairui"].Holder.LocalScript.Value.Value = 100
             end)
         end
     end
