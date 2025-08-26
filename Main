@@ -1370,6 +1370,38 @@ MiscSection:AddToggle({
 })
 
 MiscSection:AddToggle({
+	Name = "Spin Arrow",
+	Default = false,
+	Callback = function(state)
+		if state then
+			-- Khi toggle được bật
+			task.spawn(function()
+				local ReplicatedStorage = game:GetService("ReplicatedStorage")
+				local Players = game:GetService("Players")
+
+				local player = Players.LocalPlayer
+				local playerName = player.Name
+
+				local demonArtValue = ReplicatedStorage:WaitForChild("Player_Data")
+					:WaitForChild(playerName)
+					:WaitForChild("Demon_Art")
+
+				local remote = ReplicatedStorage:WaitForChild("Remotes")
+					:WaitForChild("To_Server")
+					:WaitForChild("Handle_Initiate_S_")
+
+				while state and demonArtValue.Value ~= "Arrow" do
+					remote:InvokeServer("check_can_spin_demon_art")
+					task.wait(0.5)
+					print("Hiện tại Demon_Art là:", demonArtValue.Value)
+				end
+
+			end)
+		end
+	end
+})
+
+MiscSection:AddToggle({
     Name = "Kamado God Mode [Kamado]",
     Flag = "KamadoGod",
     Keybind = false,
@@ -1408,18 +1440,6 @@ MiscSection:AddToggle({
 })
 
 
-MiscSection:AddToggle({
-    Name = "Heart Ablaze [Human]",
-    Flag = "HeartAblaze",
-    Keybind = false,
-    Callback = function (v)
-        if v then
-            game:GetService("ReplicatedStorage").Remotes.heart_ablaze_mode_remote:FireServer(true)
-        else
-            game:GetService("ReplicatedStorage").Remotes.heart_ablaze_mode_remote:FireServer(false)
-        end
-    end
-})
 
 MiscSection:AddToggle({
     Name = "Thunder Mode [Human]",
