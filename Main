@@ -3077,7 +3077,6 @@ Gourd:AddToggle({
 				if #candidateBosses == 0 then
 					VisitedBosses = {}
 					candidateBosses = ActiveBossLocations
-					print("[MoveLoop] Reset danh sách boss đã ghé.")
 				end
 
 				table.sort(candidateBosses, function(a, b)
