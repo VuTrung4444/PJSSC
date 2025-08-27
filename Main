@@ -909,7 +909,20 @@
                 "Zenitsu Haorie",
                 "Giyu Haorie",
                 "Stylish Haorie",
-                "Stylish Mask",
+                "Akai Kumo Haorie",
+				"Akuma Kurenza Mask",
+				"Akuma no ie Mask",
+				"Bandaged Blindfold",
+				"Bandaged Mask",
+				"Black Caped Scarf",
+				"Beast Necklace",
+				"Black Spider Haorie",
+				"Flame Katana",
+				"Mist Katana",
+				"Murasakiiro Sutoraipu Haorie",
+				"Olive Green Flower Haorie",
+				"Tokosen Haorie",
+				"Stylish Mask",
             }
 
             local targetNameSet = {}
