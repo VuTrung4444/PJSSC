@@ -878,6 +878,101 @@
 		end
 	})
 
+	MainSection:AddToggle({
+    Name = "QuickSell",
+    Default = false,
+    Callback = function(enabled)
+        if enabled then
+            -- CODE bán vật phẩm khi toggle bật
+            local Players = game:GetService("Players")
+            local player = Players.LocalPlayer
+
+            local targetNames = {
+                "Frost Touched Cloth",
+                "Lightning Katana",
+                "Insect Katana",
+                "Giyu's Water Katana",
+                "Shinobu Haorie",
+                "Flame Necklace",
+                "Fox Mask",
+                "Kanden Shi Haorie",
+                "Kesshoseki Necklace",
+                "Purple Flower Haorie",
+                "Scythe",
+                "Shadow Haorie",
+                "Shockwave Necklace",
+                "Water Katana",
+                "Sleeveless Dragon Haorie",
+                "Snow Haorie",
+                "Wind Katana",
+                "Yellow Haorie",
+                "Zenitsu Haorie",
+                "Giyu Haorie",
+                "Stylish Haorie",
+                "Stylish Mask",
+            }
+
+            local targetNameSet = {}
+            for _, name in ipairs(targetNames) do
+                targetNameSet[name] = true
+            end
+
+            local valuePerRarity = {
+                ["Common"] = 100,
+                ["Uncommon"] = 250,
+                ["Rare"] = 500,
+                ["Mythic"] = 3500
+            }
+
+            local replicatedStorage = game:GetService("ReplicatedStorage")
+            local playerData = replicatedStorage:WaitForChild("Player_Data")
+            local inventory = playerData:FindFirstChild(player.Name).Inventory.Items
+            local sellRemote = replicatedStorage:WaitForChild("Sell_Items_tang")
+
+            local totalValue = 0
+            local sellItemsArg = {}
+
+            for _, item in pairs(inventory:GetChildren()) do
+                local settings = item:FindFirstChild("Settings")
+                local nameObj = settings and settings:FindFirstChild("Name")
+                local rarityObj = settings and settings:FindFirstChild("Rarity")
+                local idObj = settings and settings:FindFirstChild("Id")
+                local amountObj = item:FindFirstChild("Amount")
+
+                if nameObj and rarityObj and idObj and amountObj then
+                    local itemName = nameObj.Value
+                    if targetNameSet[itemName] then
+                        local rarity = rarityObj.Value
+                        local quantity = amountObj.Value
+                        local itemId = idObj.Value
+
+                        local valuePerItem = valuePerRarity[rarity]
+                        if valuePerItem then
+                            local itemTotalValue = valuePerItem * quantity
+                            totalValue = totalValue + itemTotalValue
+                            sellItemsArg[itemId] = quantity
+                        end
+                    end
+                end
+            end
+
+            local moneyToReceive = math.floor(totalValue / 25000)
+
+            print("📦 Tổng giá trị item:", totalValue)
+            print("💰 Số tiền quy đổi (làm tròn xuống):", moneyToReceive)
+
+            local args = {
+                sellItemsArg,
+                moneyToReceive,
+                0
+            }
+
+            local result = sellRemote:InvokeServer(unpack(args))
+        end
+    end
+})
+
+
 	--// Settings \\--
 	Settings:AddDropdown({
 		Name = "Farm Method",
