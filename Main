@@ -3068,7 +3068,7 @@ Gourd:AddToggle({
 								end
 							end
 						end
-						task.wait(10)
+						task.wait(15)
 					end
 				end)
 
@@ -3083,7 +3083,7 @@ Gourd:AddToggle({
 										[4] = 5
 									}
 									game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))        
-									task.wait(20)
+									task.wait(32)
 						end
 					end
 				end)
