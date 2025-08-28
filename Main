@@ -2735,7 +2735,7 @@ Gourd:AddToggle({
 
 									-- Kiểm tra lại nếu target còn sống sau đòn tấn công
 									if target.Parent and target:FindFirstChild("Humanoid") and target.Humanoid.Health > 0 then
-										task.wait(3)
+										task.wait(5)
 									end
 								end
 							end
@@ -2755,7 +2755,7 @@ Gourd:AddToggle({
 								5
 							)        
 						end
-						task.wait(10) -- Đặt task.wait(10) sau khi kích hoạt skill để tránh spam
+						task.wait(12) 
 					end
 				end)
 			end
@@ -2984,7 +2984,7 @@ Gourd:AddToggle({
 
 
 	AuraTab:AddToggle({
-		Name = "Thunder Aura [Near Mobs]",
+		Name = "Thunder Aura",
 		Flag = "Thunder",
 		Callback = function(v)
 			getgenv().Thunder = v
@@ -3036,6 +3036,61 @@ Gourd:AddToggle({
 			end
 		end
 	})
+
+		AuraTab:AddToggle({
+		Name = "Sound Aura",
+		Flag = "Sound",
+		Callback = function(v)
+			getgenv().Sound = v
+			if v then
+				-- Luồng tấn công sát thương
+				task.spawn(function()
+					while getgenv().Sound do 
+						local target = getclosestSkills(game:GetService("Workspace").Mobs)
+						
+						if target and target:FindFirstChild("Humanoid") and target.Humanoid.Health > 0 then
+							local targetCFrame = nil
+							if target.GetModelCFrame and type(target.GetModelCFrame) == "function" then
+								targetCFrame = target:GetModelCFrame()
+							end
+
+							if targetCFrame then
+								local distance = (targetCFrame.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+
+								-- Chỉ gây sát thương khi gần hơn 40
+								if distance < 40 then
+									local args = {
+										[1] = "sound_breathing_explosive_impact_damage",
+										[2] = game.Players.LocalPlayer.Character,
+										[3] = targetCFrame
+									}          
+									game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))                
+								end
+							end
+						end
+						task.wait(7)
+					end
+				end)
+
+				-- Luồng kích hoạt skill
+				task.spawn(function()
+					while getgenv().Sound do
+						if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+									local args = {
+										[1] = "skil_ting_asd",
+										[2] = game.Players.LocalPlayer,
+										[3] = "sound_breathing_explosive_impact",
+										[4] = 5
+									}
+									game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))        
+									task.wait(15)
+						end
+					end
+				end)
+			end
+		end
+	})
+
 
 	--MoveAround--
 
