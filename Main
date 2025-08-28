@@ -3060,7 +3060,7 @@ Gourd:AddToggle({
 								-- Chỉ gây sát thương khi gần hơn 40
 								if distance < 40 then
 									local args = {
-										[1] = "sound_breathing_explosive_impact_damage",
+										[1] = "sound_breathing_bursting_boom_damage",
 										[2] = game.Players.LocalPlayer.Character,
 										[3] = targetCFrame
 									}          
@@ -3068,7 +3068,7 @@ Gourd:AddToggle({
 								end
 							end
 						end
-						task.wait(20)
+						task.wait(8)
 					end
 				end)
 
@@ -3079,11 +3079,11 @@ Gourd:AddToggle({
 									local args = {
 										[1] = "skil_ting_asd",
 										[2] = game.Players.LocalPlayer,
-										[3] = "sound_breathing_explosive_impact",
+										[3] = "sound_breathing_bursting_boom",
 										[4] = 5
 									}
 									game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer(unpack(args))        
-									task.wait(35)
+									task.wait(19)
 						end
 					end
 				end)
